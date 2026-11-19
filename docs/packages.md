@@ -46,8 +46,8 @@ the `zlxyc/Sourcecodeforplayer` snapshot pinned by mpv-iina-avs. Only
 vendored FFmpeg and AudioFilter trees are ignored. Outputs two static
 libraries in `/usr/lib`, which FFmpeg's `libarcdav3a` decoder links against.
 
-No license file exists upstream; the package is `custom` and personal-use
-only.
+No license file exists upstream; the package is tagged
+`LicenseRef-proprietary` and is personal-use only.
 
 ## icast-dkms
 
@@ -75,3 +75,21 @@ The Makefile detects clang-built kernels by grepping
   not in the official repositories.
 
 The CI builds these from the AUR on every run instead of vendoring them.
+
+## Keeping in sync with the AUR
+
+`mpv-full-build-cavs-git` started from AUR `mpv-full-build-git` (snapshot
+`0.42.0.r5.g55d3feb45c`, saved as `.aur-PKGBUILD` in the original working
+directory). To refresh it:
+
+```bash
+curl -fsSL 'https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=mpv-full-build-git' \
+  -o /tmp/aur-mpv/PKGBUILD
+diff -u /tmp/aur-mpv/PKGBUILD packages/mpv-full-build-cavs-git/PKGBUILD
+```
+
+Port over dependency changes, new `_ffmpeg_options` / `_mpv_options` entries
+and prepare/build fixes. Keep the local deltas listed above (pinned FFmpeg tag,
+decoder patches, `CPPFLAGS`, the three `--enable-lib*` flags, `davs2` /
+`uavs3d` / `libdvdread`) and re-run `makepkg --printsrcinfo > .SRCINFO` plus
+`namcap PKGBUILD`.
