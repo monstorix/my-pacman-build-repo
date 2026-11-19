@@ -41,11 +41,20 @@ build_aur() {
 }
 
 build_local() {
-  local name=$1
+  local name=$1 install=${2:-}
   msg "Package: $name"
   (
     cd "$packages_dir/$name"
     makepkg -f --noconfirm --cleanbuild --syncdeps --nocheck
+    if [[ $install == install ]]; then
+      # Later packages need these installed: mpv declares "davs2" and
+      # "av3a-git" as depends/makedepends, but no pacman repository carries
+      # those names (davs2-10bit-git provides davs2), so --syncdeps would
+      # otherwise fail with "target not found".
+      local pkgfile
+      pkgfile=$(ls -1 ./*.pkg.tar.zst | grep -v -- "-debug-" | head -n 1)
+      sudo pacman -U --noconfirm --needed "$pkgfile"
+    fi
     cp -f ./*.pkg.tar.zst "$artifacts/"
   )
 }
@@ -79,11 +88,11 @@ build_aur chromaprint-fftw
 build_aur uavs3d
 
 # Local dependencies first; they are installed so the mpv build can find them.
-build_local av3a-git
-build_local davs2-10bit-git
+build_local av3a-git install
+build_local davs2-10bit-git install
 
 # mpv is only built, not installed, but --syncdeps pulls in its repository
-# dependencies. davs2/uavs3d are already satisfied by the packages above.
+# dependencies. davs2/uavs3d/av3a are already satisfied by the packages above.
 build_local mpv-full-build-cavs-git
 verify_mpv
 
