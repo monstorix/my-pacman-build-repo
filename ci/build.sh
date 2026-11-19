@@ -32,6 +32,9 @@ build_aur() {
   mkdir -p "$(dirname "$dir")"
   git clone --depth 1 "https://aur.archlinux.org/$name.git" "$dir"
   ( cd "$dir" && makepkg -si --noconfirm --needed --nocheck )
+  # Publish these as well: mpv depends on uavs3d at runtime, and the package
+  # is not in the official repositories.
+  cp -f "$dir"/*.pkg.tar.zst "$artifacts/"
 }
 
 build_local() {

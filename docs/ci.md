@@ -26,7 +26,8 @@ Steps:
      `libuavs3d` and `--ad=help` must list `libdra` and `libarcdav3a`,
      otherwise the run fails;
    - builds `icast-dkms`;
-   - copies all `*.pkg.tar.zst` into `artifacts/`.
+   - copies every produced `*.pkg.tar.zst` (including the two AUR
+     dependencies) into `artifacts/`.
 3. `namcap` runs on the PKGBUILDs and packages (`|| true`, it is a report,
    not a gate).
 4. The artifacts are uploaded with `actions/upload-artifact@v4`
