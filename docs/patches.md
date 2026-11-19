@@ -7,7 +7,7 @@ in filename order by `prepare()`.
 
 | Patch | Effect |
 |---|---|
-| `0001-libcavs-add-avs-avsplus-dra-base.patch` | Adds the `libcavs` decoder wrapper (AVS1/AVS+, DRA audio, `libcavsdec`, `libdradec`), codec IDs, descriptors, MPEG-TS registration. This is the Linux/portable replacement for the older monolithic `ffmpeg_cavs_dra.patch` that used to live in the local PKGBUILD. |
+| `0001-libcavs-add-avs-avsplus-dra-base.patch` | Adds the CAVS (AVS1/AVS+) video decoder `cavs` and the DRA audio decoder `libdra` (sources `libcavsdec.c`, `libcavs.c`, `libdradec.c`, `dradec.c`), codec IDs, descriptors, MPEG-TS registration. This is the Linux/portable replacement for the older monolithic `ffmpeg_cavs_dra.patch` that used to live in the local PKGBUILD. |
 | `0002-libdavs2-export-sequence-display-color-metadata.patch` | Lets the `libdavs2` decoder forward the AVS2 sequence display colour description (primaries/transfer/matrix) to FFmpeg. |
 | `0003-libarcdav3a-add-av3a-audio-vivid-decoder.patch` | Adds the `libarcdav3a` decoder and its glue headers (`libavcodec/arcdav3a.h`, `avs3_stat_*.h`, ...), plus the `--enable-libarcdav3a` configure option. Links `-lAVS3AudioDec -lav3a_binaural_render`; **changed for GCC**: the upstream `-lc++` is `-lstdc++` here. |
 | `0004-av3a-container-parser-demux.patch` | AV3A parser and container demuxer (`libavformat/av3adec.c`), MPEG-TS/MOV wiring and muxer hooks. |
@@ -22,8 +22,10 @@ in filename order by `prepare()`.
   fuzz and no rejects.
 - A minimal configuration enabling only the new decoders
   (`--enable-libarcdav3a --enable-libdavs2 --enable-libuavs3d
-  --enable-decoder=libarcdav3a,libdavs2,libuavs3d,libcavs,libdradec`)
-  configures and **compiles to completion**.
+  --enable-decoder=cavs,libdra,libdavs2,libuavs3d,libarcdav3a`) configures with
+  `CONFIG_CAVS_DECODER`, `CONFIG_LIBDRA_DECODER`, `CONFIG_LIBDAVS2_DECODER`,
+  `CONFIG_LIBUAVS3D_DECODER` and `CONFIG_LIBARCDAV3A_DECODER` all `1`, and
+  **compiles to completion**; `ff_*_decoder` is present in `codec_list.c`.
 - `patch -Np1` is used so a re-run does not fail on already-applied hunks.
 
 ## What mpv-iina-avs has that this repository does not
@@ -38,7 +40,7 @@ in filename order by `prepare()`.
 
 Feature coverage is otherwise the same decoder set:
 
-- AVS1/AVS+ video (`libcavs`), DRA audio (`libdradec`)
+- AVS1/AVS+ video (`cavs`), DRA audio (`libdra`)
 - AVS2 8/10-bit (`libdavs2`, from `davs2-10bit`)
 - AVS3 video 8/10-bit (`libuavs3d`)
 - AV3A / Audio Vivid audio (`libarcdav3a`)
