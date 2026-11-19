@@ -13,6 +13,11 @@ Personal Arch Linux packaging for two things:
 
 Everything is built from source; nothing here is submitted to the AUR.
 
+The pre-existing checkouts in this workspace (`iCast/`,
+`mpv-full-build-cavs-git/`) are ignored by git. Their old `.git` directories
+were moved to `.work/legacy-git/` so this repository has no nested repositories
+or inherited remotes; the working files are untouched.
+
 ## Layout
 
 ```
