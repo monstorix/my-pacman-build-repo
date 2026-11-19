@@ -34,14 +34,14 @@ docs/                        package, patch, CI and local-build notes
 ## Install from the prebuilt repository
 
 The `repo` branch of this repository is a pacman repository (x86_64) that the
-GitHub Actions workflow refreshes. Replace `<owner>` with the GitHub account
-that hosts the repository:
+GitHub Actions workflow refreshes. This checkout is configured for
+`monstorix/my-pacman-build-repo`; change the URL if you fork it:
 
 ```ini
 # /etc/pacman.conf — put this before the official repositories so that
 # davs2-10bit-git can replace the 8-bit davs2 from [extra].
 [cavs]
-Server = https://raw.githubusercontent.com/<owner>/<repo>/repo/$arch
+Server = https://raw.githubusercontent.com/monstorix/my-pacman-build-repo/repo/$arch
 SigLevel = Optional TrustAll
 ```
 
@@ -53,10 +53,15 @@ sudo pacman -S mpv-full-build-cavs-git icast-dkms
 `SigLevel` is relaxed because the repository is unsigned. See
 [docs/ci.md](docs/ci.md) if you want to add GPG signing.
 
+The repository was verified end to end: `pacman -Sy` against
+`https://raw.githubusercontent.com/monstorix/my-pacman-build-repo/repo/x86_64`
+lists `mpv-full-build-cavs-git`, `icast-dkms`, `davs2-10bit-git`, `av3a-git`,
+`uavs3d` and `chromaprint-fftw`.
+
 ## Push to GitHub
 
-This checkout is already a git repository with no remote. After creating
-an empty GitHub repository:
+This checkout is already a git repository pushed to
+`https://github.com/monstorix/my-pacman-build-repo`. For a fresh fork:
 
 ```bash
 git remote add origin git@github.com:<owner>/<repo>.git

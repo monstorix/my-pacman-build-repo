@@ -78,7 +78,7 @@ special transport:
 
 ```ini
 [cavs]
-Server = https://raw.githubusercontent.com/<owner>/<repo>/repo/$arch
+Server = https://raw.githubusercontent.com/monstorix/my-pacman-build-repo/repo/$arch
 SigLevel = Optional TrustAll
 ```
 
@@ -95,7 +95,8 @@ the database. If you prefer signatures, see below.
 
 ## First run checklist
 
-1. Create the GitHub repository and push `main`.
+1. Create the GitHub repository and push `main` (already done for
+   `monstorix/my-pacman-build-repo`).
 2. Actions → *build-packages* → *Run workflow* (or wait for the next cron).
 3. After the run, check that a `repo` branch exists and contains
    `x86_64/cavs.db.tar.gz`.
