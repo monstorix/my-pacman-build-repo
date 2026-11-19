@@ -1,6 +1,6 @@
 # FFmpeg patch stack and comparison with mpv-iina-avs
 
-The mpv package builds FFmpeg **9.0.2** (`n9.0.2`) with eight patches taken
+The mpv package builds FFmpeg **9.0.2** (`git+.../ffmpeg.git#tag=n9.0.2`) with eight patches taken
 from [nilaoda/mpv-iina-avs](https://github.com/nilaoda/mpv-iina-avs)
 (`tools/patches/ffmpeg/`). They are vendored next to the PKGBUILD and applied
 in filename order by `prepare()`.

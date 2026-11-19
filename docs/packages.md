@@ -16,8 +16,8 @@ mpv with a **statically linked** FFmpeg 9.0.2 (`#tag=n9.0.2`), libass,
 libplacebo and ffnvcodec, following the AUR `mpv-full-build-git` recipe with
 these changes:
 
-- FFmpeg 9.0.2 (pinned tag) instead of the AUR's floating `ffmpeg.git`, plus
-  the eight decoder patches in this directory.
+- FFmpeg 9.0.2 pinned with `#tag=n9.0.2` instead of the AUR's floating
+  `ffmpeg.git`, plus the eight decoder patches in this directory.
 - `--enable-libarcdav3a`, `--enable-libdavs2`, `--enable-libuavs3d`; the
   dynamic "is davs2 installed?" check of the AUR PKGBUILD is removed because
   the dependency is now declared outright.

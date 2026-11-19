@@ -14,6 +14,10 @@ repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 packages_dir="$repo_root/packages"
 artifacts="${ARTIFACTS:-$repo_root/artifacts}"
 export MAKEFLAGS="${MAKEFLAGS:--j$(nproc)}"
+# Keep the bare VCS mirrors out of the package directories (makepkg defaults
+# SRCDEST to $startdir when it is unset).
+export SRCDEST="${SRCDEST:-$HOME/.cache/makepkg/srcdest}"
+mkdir -p "$SRCDEST"
 
 mkdir -p "$artifacts"
 rm -f "$artifacts"/*.pkg.tar.zst

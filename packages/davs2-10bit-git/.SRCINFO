@@ -1,6 +1,6 @@
 pkgbase = davs2-10bit-git
 	pkgdesc = Open-Source decoder of AVS2-P2/IEEE1857.4 video coding standard (10-bit fork, git version)
-	pkgver = 1.7.r1.g21d64c8
+	pkgver = 1.7.r220.g21d64c8
 	pkgrel = 1
 	url = https://github.com/xatabhk/davs2-10bit
 	arch = x86_64

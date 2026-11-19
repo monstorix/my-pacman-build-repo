@@ -54,4 +54,12 @@ PY
 
 cd "$dest"
 repo-add --quiet --remove --prevent-downgrade cavs.db.tar.gz ./*.pkg.tar.zst
+
+# repo-add creates cavs.db / cavs.files as symlinks. Raw file hosts such as
+# raw.githubusercontent.com return the link target as text instead of the
+# archive, so materialize them as regular files.
+for f in cavs.db cavs.files; do
+  cp -f --remove-destination "$f.tar.gz" "$f"
+done
+
 echo "repository updated: $dest"

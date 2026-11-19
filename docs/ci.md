@@ -42,12 +42,17 @@ calls `ci/publish-repo.sh`, and pushes. The branch layout is:
 
 ```
 x86_64/
-  cavs.db      -> cavs.db.tar.gz
+  cavs.db            (copy of cavs.db.tar.gz — see below)
   cavs.db.tar.gz
-  cavs.files   -> cavs.files.tar.gz
+  cavs.files         (copy of cavs.files.tar.gz)
   cavs.files.tar.gz
   *.pkg.tar.zst
 ```
+
+`repo-add` normally creates `cavs.db` as a symlink to `cavs.db.tar.gz`.
+raw.githubusercontent.com serves symlinks as their target *text*, which would
+break `pacman -Sy`, so `ci/publish-repo.sh` replaces both links with regular
+copies after every `repo-add`.
 
 Package files are copied in, and only the **two newest builds of each
 package** are kept (pruned by name and mtime before `repo-add --remove

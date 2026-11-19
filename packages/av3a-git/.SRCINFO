@@ -1,13 +1,11 @@
 pkgbase = av3a-git
 	pkgdesc = AVS3 audio (AV3A/Audio Vivid) reference decoder and binaural renderer (static, git version)
-	pkgver = r1.ge7d244d
+	pkgver = r48.ge7d244d
 	pkgrel = 1
 	url = https://github.com/zlxyc/Sourcecodeforplayer
 	arch = x86_64
-	license = custom
+	license = LicenseRef-proprietary
 	makedepends = git
-	depends = glibc
-	depends = gcc-libs
 	provides = av3a
 	options = !lto
 	options = !strip

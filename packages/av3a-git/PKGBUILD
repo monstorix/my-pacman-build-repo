@@ -9,13 +9,14 @@
 # and AudioFilter trees in that repository are ignored.
 
 pkgname=av3a-git
-pkgver=r1.ge7d244d
+pkgver=r48.ge7d244d
 pkgrel=1
 pkgdesc="AVS3 audio (AV3A/Audio Vivid) reference decoder and binaural renderer (static, git version)"
 arch=('x86_64')
 url="https://github.com/zlxyc/Sourcecodeforplayer"
-license=('custom')
-depends=('glibc' 'gcc-libs')
+license=('LicenseRef-proprietary')
+# The package only ships static archives; the final link happens in FFmpeg/mpv.
+depends=()
 makedepends=('git')
 provides=('av3a')
 options=('!lto' '!strip')
@@ -44,6 +45,7 @@ build() {
   # --- AVS3 audio decoder ------------------------------------------------
   local -a _dec_cflags=(
     -O2 -fPIC -std=c99 -Dmain=avs3_decoder_main -fsigned-char
+    -ffile-prefix-map=${srcdir}/=
     -I"${_dec_src}/avs3Decoder/include"
     -I"${_dec_src}/avs3Decoder/src"
     -I"${_dec_src}/libavs3_common"
@@ -67,9 +69,9 @@ build() {
     -I"${_render_src}/ext/hrtf_database"
     -I"${srcdir}/av3a/av3a_binaural_render/VMFFramework/bin/VMFSDK/include/PlatForm"
   )
-  local -a _cflags=(-O2 -fPIC -DHAVE_CONFIG_H "${_render_incs[@]}")
+  local -a _cflags=(-O2 -fPIC -ffile-prefix-map=${srcdir}/= -DHAVE_CONFIG_H "${_render_incs[@]}")
   # GCC 14+ needs <cstdint> before the vendored xml_parser.h uses uint64_t.
-  local -a _cxxflags=(-O2 -fPIC -std=c++11 -DHAVE_CONFIG_H -include cstdint "${_render_incs[@]}")
+  local -a _cxxflags=(-O2 -fPIC -std=c++11 -ffile-prefix-map=${srcdir}/= -DHAVE_CONFIG_H -include cstdint "${_render_incs[@]}")
 
   while IFS= read -r _src; do
     _rel="${_src#${_render_src}/}"

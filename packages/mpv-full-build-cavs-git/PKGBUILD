@@ -5,7 +5,7 @@
 # The FFmpeg patches are vendored next to this PKGBUILD and applied in filename order.
 
 pkgname=mpv-full-build-cavs-git
-pkgver=0.42.0.r5.g55d3feb45c
+pkgver=0.42.0.r169.gb7339522cd
 pkgrel=1
 pkgdesc="mpv with a static FFmpeg including CAVS/DRA/AVS2-10bit/AVS3/AV3A decoding (git version)"
 arch=('x86_64')
@@ -274,7 +274,7 @@ prepare() {
 
   _prepare_ffnvcodec
 
-  cd mpv-build
+  cd "${srcdir}/mpv-build"
   sed -e 's|meson setup|arch-meson|g' \
       -e 's|-Dprefer_static=true||g' \
       -e 's|-Dbuildtype=release||g' \
@@ -576,7 +576,7 @@ prepare() {
 build() {
   export PKG_CONFIG_PATH=${srcdir}/usr/lib/pkgconfig
 
-  cd mpv-build
+  cd "${srcdir}/mpv-build"
   if [ -d /opt/cuda ]; then
     sed -i 's|scripts/mpv-config|sed \-i "s\|-lavfilter\|-L/opt/cuda/targets/${CARCH}-linux/lib/ -lavfilter\|" build_libs/lib/pkgconfig/libavfilter.pc\nscripts/mpv-config|' "${srcdir}/mpv-build/build"
   fi
@@ -584,7 +584,7 @@ build() {
 }
 
 package() {
-  cd mpv-build
+  cd "${srcdir}/mpv-build"
   DESTDIR="${pkgdir}" ./install
 
   install -Dm755 mpv/TOOLS/mpv_identify.sh "${pkgdir}/usr/bin/mpv-identify"

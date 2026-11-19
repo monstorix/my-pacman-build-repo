@@ -8,7 +8,7 @@
 # included; this package is x86_64 only for now).
 
 pkgname=davs2-10bit-git
-pkgver=1.7.r1.g21d64c8
+pkgver=1.7.r220.g21d64c8
 pkgrel=1
 pkgdesc="Open-Source decoder of AVS2-P2/IEEE1857.4 video coding standard (10-bit fork, git version)"
 arch=('x86_64')
@@ -33,12 +33,12 @@ sha256sums=('SKIP'
             '64aa309b9217269c83ccd7183aad3b7980da76515a9700bbce9499cb85d58460')
 
 pkgver() {
-  cd davs2
+  cd davs2-10bit
   printf '1.7.r%s.g%s' "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
 }
 
 prepare() {
-  cd davs2
+  cd davs2-10bit
 
   # Upstream sources use CRLF line endings, which GNU patch refuses to match;
   # git apply handles them correctly.
@@ -54,7 +54,7 @@ prepare() {
 }
 
 build() {
-  cd davs2/build/linux
+  cd davs2-10bit/build/linux
   ./configure \
     --prefix=/usr \
     --disable-cli \
@@ -66,9 +66,9 @@ build() {
 }
 
 package() {
-  cd davs2/build/linux
+  cd davs2-10bit/build/linux
   make DESTDIR="${pkgdir}" install-lib-shared
 
-  install -Dm644 "${srcdir}/davs2/COPYING" \
+  install -Dm644 "${srcdir}/davs2-10bit/COPYING" \
     "${pkgdir}/usr/share/licenses/${pkgname}/COPYING"
 }
