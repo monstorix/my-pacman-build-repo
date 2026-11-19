@@ -61,26 +61,41 @@ build_local() {
 
 verify_mpv() {
   msg "Smoke test: the built mpv exposes the CAVS/AVS decoders"
-  local pkg dir
+  local pkg dir out_v out_a missing=0 try
   pkg=$(ls -1 "$artifacts"/mpv-full-build-cavs-git-*.pkg.tar.zst | head -n 1)
   dir=$(mktemp -d)
   bsdtar -xf "$pkg" -C "$dir" usr/bin/mpv
-  "$dir/usr/bin/mpv" --no-config --version | head -n 2
-  local dec missing=0
-  for dec in cavs libdavs2 libuavs3d; do
-    if ! "$dir/usr/bin/mpv" --no-config --vd=help 2>/dev/null | grep -qw -- "$dec"; then
-      echo "!! video decoder $dec is missing from the built mpv" >&2
-      missing=1
-    fi
+  # A deterministic locale avoids any output differences on the runner.
+  export LC_ALL=C
+  # The first invocation right after unpacking occasionally lost part of the
+  # output on the GitHub runner; retry once before declaring failure.
+  for try in 1 2; do
+    out_v="$dir/video.txt"
+    out_a="$dir/audio.txt"
+    "$dir/usr/bin/mpv" --no-config --vd=help >"$out_v" 2>&1 || true
+    "$dir/usr/bin/mpv" --no-config --ad=help >"$out_a" 2>&1 || true
+    missing=0
+    local dec
+    for dec in cavs libdavs2 libuavs3d; do
+      grep -qw -- "$dec" "$out_v" || { echo "!! video decoder $dec is missing" >&2; missing=1; }
+    done
+    for dec in libdra libarcdav3a; do
+      grep -qw -- "$dec" "$out_a" || { echo "!! audio decoder $dec is missing" >&2; missing=1; }
+    done
+    if [[ $missing -eq 0 ]]; then break; fi
+    [[ $try -eq 1 ]] && sleep 2
   done
-  for dec in libdra libarcdav3a; do
-    if ! "$dir/usr/bin/mpv" --no-config --ad=help 2>/dev/null | grep -qw -- "$dec"; then
-      echo "!! audio decoder $dec is missing from the built mpv" >&2
-      missing=1
-    fi
-  done
+  "$dir/usr/bin/mpv" --no-config --version | head -n 2 || true
+  if [[ $missing -ne 0 ]]; then
+    echo "--- video decoder list (lines matching AVS/DRA) ---" >&2
+    grep -i -E 'avs|dra|cavs' "$out_v" >&2 || true
+    echo "--- first 40 lines of --vd=help ---" >&2
+    head -n 40 "$out_v" >&2 || true
+    echo "--- package contents (usr/bin) ---" >&2
+    bsdtar -tf "$pkg" | grep -E 'usr/(bin|lib)/' | head -n 20 >&2 || true
+  fi
   rm -rf "$dir"
-  [ "$missing" -eq 0 ]
+  [[ $missing -eq 0 ]]
 }
 
 # The patched FFmpeg needs these at configure/link time.
@@ -94,10 +109,13 @@ build_local davs2-10bit-git install
 # mpv is only built, not installed, but --syncdeps pulls in its repository
 # dependencies. davs2/uavs3d/av3a are already satisfied by the packages above.
 build_local mpv-full-build-cavs-git
-verify_mpv
 
 # DKMS package: the module is compiled on the target machine, not here.
 build_local icast-dkms
+
+# Run the smoke test last so a failure cannot hide the DKMS package from the
+# published artifacts.
+verify_mpv
 
 msg "Artifacts in $artifacts"
 ls -lh "$artifacts"
