@@ -67,6 +67,27 @@ The Makefile detects clang-built kernels by grepping
 `LLVM=1`; without that, GCC fails on CachyOS kernels with errors such as
 `unrecognized command-line option '-fms-anonymous-structs'`.
 
+### Automatic loading
+
+`dvb-usb-icast-smit` resolves `icast_fe_attach()` from `dvb-usb-icast-fe`
+through `dvb_attach()`, which is a `symbol_request()`: if the frontend module
+is not loaded at probe time the attach fails with `not attached iCast usb
+device`. The package therefore ships:
+
+- `/usr/lib/modprobe.d/icast-dkms.conf` — `softdep dvb-usb-icast-smit pre:
+  dvb-usb-icast-fe`, so every `modprobe` of the bridge (including the one udev
+  runs for the USB modalias `usb:v29DFp0001d*...`) loads the frontend first;
+- `/usr/lib/modules-load.d/icast-dkms.conf` — loads the bridge at boot, so the
+  frontend is registered before udev coldplug probes an already connected
+  adapter;
+- the `.install` script runs `modprobe dvb-usb-icast-smit` after
+  `dkms install`, covering adapters that were plugged in before the package
+  was installed (udev does not re-send their add event), and unloads the
+  modules before an upgrade/removal.
+
+Verified with `modprobe -C ... --show-depends`: the alias and the plain module
+name both resolve to `dvb-usb-icast-fe.ko` followed by `dvb-usb-icast-smit.ko`.
+
 ## Repository packages used by the CI, not packaged here
 
 - `uavs3d` (AUR) — AVS3 video, 8+10-bit shared library; not in the official

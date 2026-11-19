@@ -10,14 +10,24 @@ post_install() {
   dkms add -m icast -v "${_ver}" 2>/dev/null || true
   dkms build -m icast -v "${_ver}"
   dkms install -m icast -v "${_ver}" --force
+
+  # If the adapter was already plugged in before this install, udev has
+  # already sent its add event and will not probe it again. Load the bridge
+  # now; the softdep in /usr/lib/modprobe.d/icast-dkms.conf pulls in
+  # dvb-usb-icast-fe first.
+  modprobe dvb-usb-icast-smit 2>/dev/null || true
 }
 
 post_upgrade() {
-  # Drop the previous DKMS version, then build the new one.
+  # Unload the old build before replacing the file, then install and load the
+  # new one.
+  modprobe -r dvb-usb-icast-smit dvb-usb-icast-fe 2>/dev/null || true
   dkms remove -m icast -v "$2" --all 2>/dev/null || true
   post_install "$1"
 }
 
 pre_remove() {
+  # Never delete a .ko that is still loaded.
+  modprobe -r dvb-usb-icast-smit dvb-usb-icast-fe 2>/dev/null || true
   dkms remove -m icast -v "$1" --all 2>/dev/null || true
 }

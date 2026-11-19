@@ -50,6 +50,11 @@ sudo pacman -Syu
 sudo pacman -S mpv-full-build-cavs-git icast-dkms
 ```
 
+The iCast driver loads by itself: a `modprobe.d` softdep loads
+`dvb-usb-icast-fe` before `dvb-usb-icast-smit`, `modules-load.d` pulls the
+bridge in at boot, and the package's install script modprobes it when the
+adapter is already plugged in. See [docs/packages.md](docs/packages.md).
+
 `SigLevel` is relaxed because the repository is unsigned. See
 [docs/ci.md](docs/ci.md) if you want to add GPG signing.
 

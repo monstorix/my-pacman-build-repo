@@ -1,7 +1,7 @@
 pkgbase = icast-dkms
 	pkgdesc = DKMS driver for the SMIT iCast DVB-T2/C USB adapter (29df:0001)
 	pkgver = 1.0.0
-	pkgrel = 1
+	pkgrel = 2
 	url = https://github.com/nxdong520/iCast
 	install = icast-dkms.install
 	arch = any
@@ -19,6 +19,8 @@ pkgbase = icast-dkms
 	source = icast-smit.c
 	source = dvb-usb.h
 	source = dvb-pll.h
+	source = icast-dkms.conf
+	source = icast-dkms-modules-load.conf
 	source = LICENSE
 	sha256sums = f1e8b1fe3cfd646b21b28706f6d1cc3685a0263d2d843cd0778ca973d3349f7b
 	sha256sums = 48f9fcea7626fc537674a8cd8010829336bbaac54960399d9ba605e2e3823656
@@ -29,6 +31,8 @@ pkgbase = icast-dkms
 	sha256sums = 4c6fb2e0bab454fb03f3f2f840770e10c66a014ac387b6176e74f0a606b95ca7
 	sha256sums = ea66b0b5acff32c590828fe7017289895b92e58f9822df5e5ee662e5e4285411
 	sha256sums = 0e96e310c022cd79e2ac6095e22ed7fadc659f229d3e5e8ea1128dc500a854a0
+	sha256sums = 53fcd920232fb8b7d5cb2b467d83c4bcfc5741d333659bdc96e176defeca663c
+	sha256sums = 7833d3a6714d9c24f7ad8b5d882c44a07853399d4eb30338925b45820cc9b8b5
 	sha256sums = 8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643
 
 pkgname = icast-dkms

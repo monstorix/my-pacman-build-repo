@@ -61,9 +61,26 @@ build`/`dkms install` for the running kernel when its headers are present.
 # after makepkg -si
 dkms status                        # icast/1.0.0, <kernel>: installed
 modinfo dvb-usb-icast-smit | head
-sudo modprobe dvb-usb-icast-smit   # normally auto-loaded by the USB ID
-lsmod | grep icast
+modprobe -n -v --show-depends dvb-usb-icast-smit
+lsmod | grep icast                 # should already list both modules
 dmesg | tail -30                   # "iCast" / frontend attach messages
+```
+
+Both modules load without manual intervention:
+
+- `/usr/lib/modprobe.d/icast-dkms.conf` makes `modprobe` load
+  `dvb-usb-icast-fe` before `dvb-usb-icast-smit`, so the frontend is present
+  when the USB bridge attaches it (the driver looks it up with `dvb_attach()`
+  / `symbol_request()`, which is not reliable on its own);
+- `/usr/lib/modules-load.d/icast-dkms.conf` loads the bridge at boot, before
+  udev coldplug runs;
+- the package's `.install` script modprobes the bridge right after
+  `dkms install`, which covers an adapter that was already plugged in.
+
+If you installed an older build (1.0.0-1) or want to load the driver by hand:
+
+```bash
+sudo modprobe dvb-usb-icast-smit   # pulls in dvb-usb-icast-fe via softdep
 ```
 
 The device is `29df:0001`; the module has no firmware download step, so no

@@ -7,7 +7,7 @@
 
 pkgname=icast-dkms
 pkgver=1.0.0
-pkgrel=1
+pkgrel=2
 pkgdesc="DKMS driver for the SMIT iCast DVB-T2/C USB adapter (29df:0001)"
 arch=('any')
 url="https://github.com/nxdong520/iCast"
@@ -26,6 +26,8 @@ source=('Makefile'
         'icast-smit.c'
         'dvb-usb.h'
         'dvb-pll.h'
+        'icast-dkms.conf'
+        'icast-dkms-modules-load.conf'
         'LICENSE')
 sha256sums=('f1e8b1fe3cfd646b21b28706f6d1cc3685a0263d2d843cd0778ca973d3349f7b'
             '48f9fcea7626fc537674a8cd8010829336bbaac54960399d9ba605e2e3823656'
@@ -36,6 +38,8 @@ sha256sums=('f1e8b1fe3cfd646b21b28706f6d1cc3685a0263d2d843cd0778ca973d3349f7b'
             '4c6fb2e0bab454fb03f3f2f840770e10c66a014ac387b6176e74f0a606b95ca7'
             'ea66b0b5acff32c590828fe7017289895b92e58f9822df5e5ee662e5e4285411'
             '0e96e310c022cd79e2ac6095e22ed7fadc659f229d3e5e8ea1128dc500a854a0'
+            '53fcd920232fb8b7d5cb2b467d83c4bcfc5741d333659bdc96e176defeca663c'
+            '7833d3a6714d9c24f7ad8b5d882c44a07853399d4eb30338925b45820cc9b8b5'
             '8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643')
 
 package() {
@@ -47,6 +51,14 @@ package() {
 
   # dkms requires the directory name and PACKAGE_VERSION to match.
   sed -i "s/@VERSION@/${pkgver}/" "${_src}/dkms.conf"
+
+  # modprobe loads dvb-usb-icast-fe before dvb-usb-icast-smit (softdep), and
+  # systemd-modules-load pulls both in at boot so the frontend is ready before
+  # udev probes the adapter.
+  install -Dm644 icast-dkms.conf \
+    "${pkgdir}/usr/lib/modprobe.d/${pkgname}.conf"
+  install -Dm644 icast-dkms-modules-load.conf \
+    "${pkgdir}/usr/lib/modules-load.d/${pkgname}.conf"
 
   install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }
