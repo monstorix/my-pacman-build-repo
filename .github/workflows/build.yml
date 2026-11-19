@@ -54,10 +54,12 @@ jobs:
           fi
 
       - name: Upload artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: arch-packages
           path: artifacts/*.pkg.tar.zst
+          if-no-files-found: ignore
           retention-days: 14
 
       - name: Publish pacman repository branch
