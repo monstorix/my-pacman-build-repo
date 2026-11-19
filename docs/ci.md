@@ -54,8 +54,13 @@ x86_64/
   cavs.db.tar.gz
   cavs.files         (copy of cavs.files.tar.gz)
   cavs.files.tar.gz
-  *.pkg.tar.zst
+  *.pkg.tar.zst   (runtime packages only)
 ```
+
+Debug packages (`*-debug-*`) are built and uploaded as workflow artifacts but
+are **not** published to the `repo` branch: the mpv debug package is over
+100 MB, above GitHub's per-file limit. For the same reason `publish-repo.sh`
+skips any single package above ~95 MB with a warning.
 
 `repo-add` normally creates `cavs.db` as a symlink to `cavs.db.tar.gz`.
 raw.githubusercontent.com serves symlinks as their target *text*, which would

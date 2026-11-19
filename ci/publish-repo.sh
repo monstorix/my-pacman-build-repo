@@ -12,9 +12,22 @@ dest="$repo_dir/$arch"
 
 mkdir -p "$dest"
 shopt -s nullglob
-pkgs=("$artifacts"/*.pkg.tar.zst)
+# Debug packages are enormous (the mpv one is over 100 MB) and GitHub refuses
+# blobs above 100 MB; the repo branch only carries what pacman installs.
+pkgs=()
+for p in "$artifacts"/*.pkg.tar.zst; do
+  case "$p" in
+    *-debug-*) continue ;;
+  esac
+  size=$(stat -c %s "$p")
+  if (( size > 95000000 )); then
+    echo "skip $p: $(numfmt --to=iec "$size") exceeds the GitHub file limit" >&2
+    continue
+  fi
+  pkgs+=("$p")
+done
 if ((${#pkgs[@]} == 0)); then
-  echo "no packages in $artifacts" >&2
+  echo "no publishable packages in $artifacts" >&2
   exit 1
 fi
 cp -f "${pkgs[@]}" "$dest/"
