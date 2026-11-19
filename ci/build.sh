@@ -5,6 +5,9 @@
 # local machine after installing base-devel, git, sudo and an AUR helper is
 # NOT required: the two AUR dependencies are built from source here as well.
 #
+# Runs from .github/workflows/build.yml on schedule, on push to main touching
+# packages/, ci/ or the workflow itself, and on manual workflow_dispatch.
+#
 # Environment:
 #   ARTIFACTS  output directory for *.pkg.tar.zst (default: <repo>/artifacts)
 #   JOBS       parallel make jobs (default: nproc)
