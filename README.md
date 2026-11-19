@@ -50,8 +50,8 @@ sudo pacman -S mpv-full-build-cavs-git icast-dkms
 
 ## Push to GitHub
 
-This checkout is already a git repository with two commits and no remote.
-After creating an empty GitHub repository:
+This checkout is already a git repository with no remote. After creating
+an empty GitHub repository:
 
 ```bash
 git remote add origin git@github.com:<owner>/<repo>.git
@@ -98,5 +98,5 @@ Details, ordering and troubleshooting: [docs/local-build.md](docs/local-build.md
 - davs2-10bit: GPL-2.0-only.
 - uavs3d: BSD-3-Clause.
 - av3a-git: the upstream snapshot carries **no license file**; the package is
-  marked `custom` and is intended for personal use only. Do not redistribute
+  tagged `LicenseRef-proprietary` and is intended for personal use only. Do not redistribute
   the built binaries without clarifying the license.
