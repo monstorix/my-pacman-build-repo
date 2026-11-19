@@ -79,6 +79,10 @@ SigLevel = Optional TrustAll
 `SigLevel = Optional TrustAll` is required because `repo-add` does not sign
 the database. If you prefer signatures, see below.
 
+> `raw.githubusercontent.com` sits behind a CDN. After a workflow run, the new
+> database and packages can take a few minutes to appear; retry `pacman -Syu`
+> instead of assuming the publish step failed.
+
 > Put `[cavs]` **before** `[extra]` in `pacman.conf`. `davs2-10bit-git`
 > provides `davs2`, and repository order decides which one wins when both
 > repositories offer it.
