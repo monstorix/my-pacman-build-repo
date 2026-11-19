@@ -97,6 +97,30 @@ Re-run the signing after every kernel/DKMS rebuild (or hook it into a pacman
 hook). Module loading fails silently apart from a `dmesg` "Key was rejected by
 service" message otherwise.
 
+## Verifying the decoder stack
+
+The FFmpeg patch stack registers five decoders; mpv exposes them through
+`--vd=help` (video) and `--ad=help` (audio):
+
+```bash
+mpv --vd=help | grep -E '^ *cavs$|libdavs2|libuavs3d'
+mpv --ad=help | grep -E 'libdra|libarcdav3a'
+```
+
+Expected: `cavs` (AVS/AVS+, native), `libdavs2` (AVS2, 10-bit capable),
+`libuavs3d` (AVS3 video), `libdra` (DRA audio) and `libarcdav3a` (AV3A /
+Audio Vivid). A missing entry means the corresponding configure probe or
+library was not found at build time.
+
+Playback smoke test (any AVS/AVS2/AVS3 sample):
+
+```bash
+mpv --no-config --msg-level=all=v,vd=v,ad=v sample.avs
+```
+
+`ffmpeg -decoders | grep -E 'cavs|davs2|uavs3d|dradec|arcdav3a'` is not
+available here: this package does not install the FFmpeg CLI.
+
 ## Troubleshooting
 
 | Symptom | Cause / fix |
