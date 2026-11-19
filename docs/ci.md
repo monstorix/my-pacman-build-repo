@@ -41,7 +41,11 @@ The workflow needs `permissions: contents: write`; it uses the built-in
 ## The `repo` branch
 
 `ci/push-repo.sh` checks out (or creates as an orphan) the `repo` branch,
-calls `ci/publish-repo.sh`, and pushes. The branch layout is:
+calls `ci/publish-repo.sh`, and force-pushes the result as a **single fresh
+commit**. The branch is a download endpoint, not a history, so replacing it
+every run keeps the repository from accumulating hundreds of megabytes of
+superseded package blobs (GitHub rejects files over 100 MB). The branch
+layout is:
 
 ```
 x86_64/

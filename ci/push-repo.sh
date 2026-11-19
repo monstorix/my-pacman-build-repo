@@ -9,7 +9,11 @@ set -euo pipefail
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 artifacts="${ARTIFACTS:-$repo_root/artifacts}"
-remote="https://x-access-token:${TOKEN:?TOKEN is required}@github.com/${GITHUB_REPOSITORY:?GITHUB_REPOSITORY is required}.git"
+if [[ -n "${REPO_REMOTE:-}" ]]; then
+  remote=$REPO_REMOTE
+else
+  remote="https://x-access-token:${TOKEN:?TOKEN is required}@github.com/${GITHUB_REPOSITORY:?GITHUB_REPOSITORY is required}.git"
+fi
 
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
@@ -27,11 +31,16 @@ bash "$repo_root/ci/publish-repo.sh" "$work" "$artifacts"
 cd "$work"
 git config user.name "github-actions[bot]"
 git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+# Replace the branch with a single fresh commit instead of stacking binary
+# package history forever: pacman only downloads files, and a fresh root keeps
+# the repository well below GitHub's size limits.
+git checkout --quiet --orphan repo-publish
 git add -A
 if git diff --cached --quiet; then
   echo "repository already up to date"
   exit 0
 fi
 git commit --quiet -m "repo: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-git push --quiet origin HEAD:repo
+git push --quiet --force origin HEAD:repo
 echo "pushed repo branch"
