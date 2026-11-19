@@ -22,9 +22,9 @@ Steps:
    - builds and installs `av3a-git` and `davs2-10bit-git` (needed to link
      FFmpeg);
    - builds `mpv-full-build-cavs-git` (build only, not installed) and
-     smoke-tests the package: the binary must report `libcavs`, `libdavs2`,
-     `libuavs3d`, `libarcdav3a` and `libdradec` in `--vd=help`, otherwise the
-     run fails;
+     smoke-tests the package: `--vd=help` must list `cavs`, `libdavs2` and
+     `libuavs3d` and `--ad=help` must list `libdra` and `libarcdav3a`,
+     otherwise the run fails;
    - builds `icast-dkms`;
    - copies all `*.pkg.tar.zst` into `artifacts/`.
 3. `namcap` runs on the PKGBUILDs and packages (`|| true`, it is a report,

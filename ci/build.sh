@@ -52,9 +52,15 @@ verify_mpv() {
   bsdtar -xf "$pkg" -C "$dir" usr/bin/mpv
   "$dir/usr/bin/mpv" --no-config --version | head -n 2
   local dec missing=0
-  for dec in libcavs libdavs2 libuavs3d libarcdav3a libdradec; do
+  for dec in cavs libdavs2 libuavs3d; do
     if ! "$dir/usr/bin/mpv" --no-config --vd=help 2>/dev/null | grep -qw -- "$dec"; then
-      echo "!! decoder $dec is missing from the built mpv" >&2
+      echo "!! video decoder $dec is missing from the built mpv" >&2
+      missing=1
+    fi
+  done
+  for dec in libdra libarcdav3a; do
+    if ! "$dir/usr/bin/mpv" --no-config --ad=help 2>/dev/null | grep -qw -- "$dec"; then
+      echo "!! audio decoder $dec is missing from the built mpv" >&2
       missing=1
     fi
   done
