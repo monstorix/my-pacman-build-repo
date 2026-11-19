@@ -1,0 +1,30 @@
+pkgbase = davs2-10bit-git
+	pkgdesc = Open-Source decoder of AVS2-P2/IEEE1857.4 video coding standard (10-bit fork, git version)
+	pkgver = 1.7.r1.g21d64c8
+	pkgrel = 1
+	url = https://github.com/xatabhk/davs2-10bit
+	arch = x86_64
+	license = GPL-2.0-only
+	makedepends = git
+	makedepends = nasm
+	depends = glibc
+	provides = davs2
+	provides = libdavs2.so=16-64
+	conflicts = davs2
+	conflicts = davs2-git
+	conflicts = libdavs2
+	options = !lto
+	source = git+https://github.com/xatabhk/davs2-10bit.git#commit=21d64c8f8e36af71fc7a488cd6f789c86cdd1200
+	source = 0001-enable-10bit-build-and-propagate-frame-packet-position.patch
+	source = 0011-enable-asm-intrinsics-on-macos.patch
+	source = 0012-x86-build-avx-codepaths-as-dispatch-only.patch
+	source = 0013-x86-10bit-motion-compensation.patch
+	source = 0010-export-sequence-display-color-description.patch
+	sha256sums = SKIP
+	sha256sums = 2e83a0f00092c58a4d5a3350ca6f48b1f411dbe088b9dd5c8812dcd2e5986f65
+	sha256sums = 479cfb0b5ca27ca3b1553a5bc34f479e26ccd12aa534e35c0b69182450ac1f4c
+	sha256sums = 0b191c5701e4993917b0b7b7d690214ac8d20450e45859d7252b7c5012a2e346
+	sha256sums = ecb5ab1cac801109fa40d7ff6724dde5f8f4ac62ecf9aa2c5ea6a42eb831d575
+	sha256sums = 64aa309b9217269c83ccd7183aad3b7980da76515a9700bbce9499cb85d58460
+
+pkgname = davs2-10bit-git

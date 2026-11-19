@@ -1,0 +1,52 @@
+# Maintainer: local build (not for AUR)
+# DKMS packaging of the SMIT iCast DVB-T2/C USB adapter driver.
+# Sources are vendored from https://github.com/nxdong520/iCast (commit 2d6bab1)
+# so that the package does not need to download a full kernel tree at build
+# time. Only the device modules are built; dvb-core/dvb-usb/dvb-usb-v2 come
+# from the running kernel.
+
+pkgname=icast-dkms
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="DKMS driver for the SMIT iCast DVB-T2/C USB adapter (29df:0001)"
+arch=('any')
+url="https://github.com/nxdong520/iCast"
+license=('GPL-2.0-only')
+depends=('dkms')
+optdepends=('linux-headers: build the module for the running kernel'
+            'linux-cachyos-headers: headers for the CachyOS kernel'
+            'linux-lts-headers: headers for the LTS kernel')
+install="${pkgname}.install"
+source=('Makefile'
+        'dkms.conf'
+        'smit.c'
+        'smit.h'
+        'icast-fe.c'
+        'icast-fe.h'
+        'icast-smit.c'
+        'dvb-usb.h'
+        'dvb-pll.h'
+        'LICENSE')
+sha256sums=('f1e8b1fe3cfd646b21b28706f6d1cc3685a0263d2d843cd0778ca973d3349f7b'
+            '48f9fcea7626fc537674a8cd8010829336bbaac54960399d9ba605e2e3823656'
+            '71bc5d5395f4d6de09e299e461464d64b536fe069e561416e1345b20f50b9850'
+            'a60dc1076886b2a27d7723b1b9c320f7a80e1464649949cfe4afdac319bd0e25'
+            'bacd455507b1fcb7bfecea50f9825da96af73d00ad720d1f6d650217a98f8624'
+            '2ae2a678a0aadca212da822aa82dd9741b007a802e0642ddfe8460490df163c3'
+            '4c6fb2e0bab454fb03f3f2f840770e10c66a014ac387b6176e74f0a606b95ca7'
+            'ea66b0b5acff32c590828fe7017289895b92e58f9822df5e5ee662e5e4285411'
+            '0e96e310c022cd79e2ac6095e22ed7fadc659f229d3e5e8ea1128dc500a854a0'
+            '8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643')
+
+package() {
+  local _src="${pkgdir}/usr/src/icast-${pkgver}"
+
+  install -d "${_src}"
+  install -m644 Makefile dkms.conf smit.c smit.h icast-fe.c icast-fe.h \
+    icast-smit.c dvb-usb.h dvb-pll.h "${_src}/"
+
+  # dkms requires the directory name and PACKAGE_VERSION to match.
+  sed -i "s/@VERSION@/${pkgver}/" "${_src}/dkms.conf"
+
+  install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

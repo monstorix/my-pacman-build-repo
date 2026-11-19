@@ -1,0 +1,74 @@
+# Maintainer: local build (not for AUR)
+# davs2 fork with 10-bit output and sequence display colour metadata export.
+# This package provides 'davs2' and therefore replaces the official 8-bit
+# davs2 / davs2-git packages on systems that need AVS2 10-bit decoding.
+#
+# Patches are the Linux/x86_64 subset of the stack used by
+# https://github.com/nilaoda/mpv-iina-avs (the aarch64 NEON patches are not
+# included; this package is x86_64 only for now).
+
+pkgname=davs2-10bit-git
+pkgver=1.7.r1.g21d64c8
+pkgrel=1
+pkgdesc="Open-Source decoder of AVS2-P2/IEEE1857.4 video coding standard (10-bit fork, git version)"
+arch=('x86_64')
+url="https://github.com/xatabhk/davs2-10bit"
+license=('GPL-2.0-only')
+depends=('glibc')
+makedepends=('git' 'nasm')
+provides=('davs2' 'libdavs2.so=16-64')
+conflicts=('davs2' 'davs2-git' 'libdavs2')
+options=('!lto')
+source=("git+https://github.com/xatabhk/davs2-10bit.git#commit=21d64c8f8e36af71fc7a488cd6f789c86cdd1200"
+        '0001-enable-10bit-build-and-propagate-frame-packet-position.patch'
+        '0011-enable-asm-intrinsics-on-macos.patch'
+        '0012-x86-build-avx-codepaths-as-dispatch-only.patch'
+        '0013-x86-10bit-motion-compensation.patch'
+        '0010-export-sequence-display-color-description.patch')
+sha256sums=('SKIP'
+            '2e83a0f00092c58a4d5a3350ca6f48b1f411dbe088b9dd5c8812dcd2e5986f65'
+            '479cfb0b5ca27ca3b1553a5bc34f479e26ccd12aa534e35c0b69182450ac1f4c'
+            '0b191c5701e4993917b0b7b7d690214ac8d20450e45859d7252b7c5012a2e346'
+            'ecb5ab1cac801109fa40d7ff6724dde5f8f4ac62ecf9aa2c5ea6a42eb831d575'
+            '64aa309b9217269c83ccd7183aad3b7980da76515a9700bbce9499cb85d58460')
+
+pkgver() {
+  cd davs2
+  printf '1.7.r%s.g%s' "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+prepare() {
+  cd davs2
+
+  # Upstream sources use CRLF line endings, which GNU patch refuses to match;
+  # git apply handles them correctly.
+  local _patch
+  for _patch in \
+    "${srcdir}/0001-enable-10bit-build-and-propagate-frame-packet-position.patch" \
+    "${srcdir}/0011-enable-asm-intrinsics-on-macos.patch" \
+    "${srcdir}/0012-x86-build-avx-codepaths-as-dispatch-only.patch" \
+    "${srcdir}/0013-x86-10bit-motion-compensation.patch" \
+    "${srcdir}/0010-export-sequence-display-color-description.patch"; do
+    git apply --whitespace=nowarn "${_patch}"
+  done
+}
+
+build() {
+  cd davs2/build/linux
+  ./configure \
+    --prefix=/usr \
+    --disable-cli \
+    --disable-static \
+    --enable-shared \
+    --enable-pic \
+    --bit-depth=10
+  make
+}
+
+package() {
+  cd davs2/build/linux
+  make DESTDIR="${pkgdir}" install-lib-shared
+
+  install -Dm644 "${srcdir}/davs2/COPYING" \
+    "${pkgdir}/usr/share/licenses/${pkgname}/COPYING"
+}

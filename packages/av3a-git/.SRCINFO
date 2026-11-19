@@ -1,0 +1,19 @@
+pkgbase = av3a-git
+	pkgdesc = AVS3 audio (AV3A/Audio Vivid) reference decoder and binaural renderer (static, git version)
+	pkgver = r1.ge7d244d
+	pkgrel = 1
+	url = https://github.com/zlxyc/Sourcecodeforplayer
+	arch = x86_64
+	license = custom
+	makedepends = git
+	depends = glibc
+	depends = gcc-libs
+	provides = av3a
+	options = !lto
+	options = !strip
+	source = av3a::git+https://github.com/zlxyc/Sourcecodeforplayer.git#commit=e7d244d29454eb04c968cd98a30587303a9c15f8
+	source = 0001-guard-range-overflow-and-conceal-bad-lc-latents.patch
+	sha256sums = SKIP
+	sha256sums = 4e8b9ed38a107498587ca5bcf53dbfd39fb94d1038152dc36e7adf6b54d2c233
+
+pkgname = av3a-git

@@ -1,0 +1,105 @@
+# Maintainer: local build (not for AUR)
+# Static AVS3 audio (AV3A / "Audio Vivid") reference decoder + binaural
+# renderer, as used by the FFmpeg libarcdav3a decoder in mpv-iina-avs.
+#
+# The upstream snapshot (zlxyc/Sourcecodeforplayer, the same commit pinned by
+# mpv-iina-avs) ships no explicit license file. This package is intended for
+# personal/local use; check the licensing situation before redistributing the
+# binaries. Only the decoder and renderer trees are built; the vendored ffmpeg
+# and AudioFilter trees in that repository are ignored.
+
+pkgname=av3a-git
+pkgver=r1.ge7d244d
+pkgrel=1
+pkgdesc="AVS3 audio (AV3A/Audio Vivid) reference decoder and binaural renderer (static, git version)"
+arch=('x86_64')
+url="https://github.com/zlxyc/Sourcecodeforplayer"
+license=('custom')
+depends=('glibc' 'gcc-libs')
+makedepends=('git')
+provides=('av3a')
+options=('!lto' '!strip')
+
+source=("av3a::git+https://github.com/zlxyc/Sourcecodeforplayer.git#commit=e7d244d29454eb04c968cd98a30587303a9c15f8"
+        '0001-guard-range-overflow-and-conceal-bad-lc-latents.patch')
+sha256sums=('SKIP'
+            '4e8b9ed38a107498587ca5bcf53dbfd39fb94d1038152dc36e7adf6b54d2c233')
+
+pkgver() {
+  cd av3a
+  printf 'r%s.g%s' "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+prepare() {
+  cd av3a/av3adecoder
+  patch -Np1 -i "${srcdir}/0001-guard-range-overflow-and-conceal-bad-lc-latents.patch"
+}
+
+build() {
+  local _dec_src="${srcdir}/av3a/av3adecoder"
+  local _render_src="${srcdir}/av3a/av3a_binaural_render/AudioDecoder/av3a_binaural_render"
+  local _obj="${srcdir}/build"
+  mkdir -p "${_obj}/dec" "${_obj}/render"
+
+  # --- AVS3 audio decoder ------------------------------------------------
+  local -a _dec_cflags=(
+    -O2 -fPIC -std=c99 -Dmain=avs3_decoder_main -fsigned-char
+    -I"${_dec_src}/avs3Decoder/include"
+    -I"${_dec_src}/avs3Decoder/src"
+    -I"${_dec_src}/libavs3_common"
+    -I"${_dec_src}/libavs3_debug"
+  )
+  local _src _rel _out
+  while IFS= read -r _src; do
+    _rel="${_src#${_dec_src}/}"
+    _out="${_obj}/dec/${_rel//\//_}.o"
+    gcc "${_dec_cflags[@]}" -c "${_src}" -o "${_out}"
+  done < <(find "${_dec_src}/avs3Decoder/src" "${_dec_src}/libavs3_common" \
+                "${_dec_src}/libavs3_debug" -type f -name '*.c' | sort)
+  ar rcsD "${_obj}/libAVS3AudioDec.a" "${_obj}"/dec/*.o
+
+  # --- AV3A binaural renderer -------------------------------------------
+  local -a _render_incs=(
+    -I"${_render_src}"
+    -I"${_render_src}/ext/pffft"
+    -I"${_render_src}/ext/libsamplerate"
+    -I"${_render_src}/ext/simd"
+    -I"${_render_src}/ext/hrtf_database"
+    -I"${srcdir}/av3a/av3a_binaural_render/VMFFramework/bin/VMFSDK/include/PlatForm"
+  )
+  local -a _cflags=(-O2 -fPIC -DHAVE_CONFIG_H "${_render_incs[@]}")
+  # GCC 14+ needs <cstdint> before the vendored xml_parser.h uses uint64_t.
+  local -a _cxxflags=(-O2 -fPIC -std=c++11 -DHAVE_CONFIG_H -include cstdint "${_render_incs[@]}")
+
+  while IFS= read -r _src; do
+    _rel="${_src#${_render_src}/}"
+    _out="${_obj}/render/${_rel//\//_}.o"
+    case "${_src}" in
+      *.c)   gcc  "${_cflags[@]}"   -c "${_src}" -o "${_out}" ;;
+      *.cc|*.cpp) g++ "${_cxxflags[@]}" -c "${_src}" -o "${_out}" ;;
+    esac
+  done < <(find "${_render_src}" -type f \( -name '*.c' -o -name '*.cc' -o -name '*.cpp' \) \
+                ! -path '*/build/*' ! -path '*/Eigen/*' | sort)
+  ar rcsD "${_obj}/libav3a_binaural_render.a" "${_obj}"/render/*.o
+}
+
+package() {
+  install -Dm644 "${srcdir}/build/libAVS3AudioDec.a" \
+    "${pkgdir}/usr/lib/libAVS3AudioDec.a"
+  install -Dm644 "${srcdir}/build/libav3a_binaural_render.a" \
+    "${pkgdir}/usr/lib/libav3a_binaural_render.a"
+
+  # No upstream LICENSE file: ship the README plus a provenance notice.
+  install -Dm644 "${srcdir}/av3a/ReadMe.md" \
+    "${pkgdir}/usr/share/licenses/${pkgname}/ReadMe.md"
+  cat > "${pkgdir}/usr/share/licenses/${pkgname}/NOTICE" <<'EOF'
+This package is built from a snapshot of
+https://github.com/zlxyc/Sourcecodeforplayer
+(commit e7d244d29454eb04c968cd98a30587303a9c15f8), which is the source tree
+pinned by https://github.com/nilaoda/mpv-iina-avs.
+
+The upstream repository does not contain an explicit license file at this
+commit. The static libraries are provided for personal use together with the
+patched FFmpeg in this repository; verify licensing before redistribution.
+EOF
+}

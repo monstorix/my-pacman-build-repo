@@ -1,0 +1,603 @@
+# Maintainer: local build (not for AUR)
+# Based on AUR mpv-full-build-git by Inochi Amaoto <libraryindexsky@gmail.com>
+# Adds CAVS/AVS+/AVS2(10-bit)/AVS3/AV3A/DRA decoding via a patched FFmpeg 9.0.2,
+# following the decoder stack of https://github.com/nilaoda/mpv-iina-avs.
+# The FFmpeg patches are vendored next to this PKGBUILD and applied in filename order.
+
+pkgname=mpv-full-build-cavs-git
+pkgver=0.42.0.r5.g55d3feb45c
+pkgrel=1
+pkgdesc="mpv with a static FFmpeg including CAVS/DRA/AVS2-10bit/AVS3/AV3A decoding (git version)"
+arch=('x86_64')
+depends=(
+         # official repositories:
+         'alsa-lib'
+         'aom'
+         'aribb24'
+         'avisynthplus'
+         'bzip2'
+         'codec2'
+         'curl'
+         'dav1d'
+         'davs2'
+         'desktop-file-utils'
+         'fontconfig'
+         'freetype2'
+         'frei0r-plugins'
+         'fribidi'
+         'glad'
+         'glibc'
+         'gmp'
+         'gnutls'
+         'gsm'
+         'glslang'
+         'harfbuzz'
+         'hicolor-icon-theme'
+         'jack'
+         'kvazaar'
+         'ladspa'
+         'lame'
+         'lcms2'
+         # 'lensfun'
+         'libarchive'
+         'libass'
+         'libavc1394'
+         'libbluray'
+         'libbs2b'
+         'libcaca'
+         'libcdio-paranoia'
+         'libdc1394'
+         'libdrm'
+         'libdvdnav'
+         'libdvdread'
+         'libfdk-aac'
+         'libgcrypt'
+         'libgl'
+         'libglvnd'
+         'libgme'
+         'libiec61883'
+         'libilbc'
+         'libjxl'
+         'libmodplug'
+         'libmysofa'
+         'libopenmpt'
+         'libplacebo'
+         'libpng'
+         'libpulse'
+         'librabbitmq-c'
+         'librsvg'
+         'libsixel'
+         'libsoxr'
+         'libssh'
+         'libtheora'
+         'libva'
+         'libvdpau'
+         'libvorbis'
+         'libvpx'
+         'libwebp'
+         'libx11'
+         'libxcb'
+         'libxext'
+         'libxinerama'
+         'libxkbcommon'
+         'libxml2'
+         'libxpresent'
+         'libxrandr'
+         'libxss'
+         'libxv'
+         'lilv'
+         'lua52'
+         'lv2'
+         'mujs'
+         'ocl-icd'
+         'openal'
+         'opencore-amr'
+         'openh264'
+         'openjpeg2'
+         'openmp'
+         'opus'
+         'pipewire'
+         'pulse-native-provider'
+         'rav1e'
+         'rtmpdump'
+         'rubberband'
+         'sdl2'
+         'shaderc'
+         'snappy'
+         'sndio'
+         'speex'
+         'srt'
+         'svt-av1'
+         'tesseract'
+         'twolame'
+         'uavs3d'
+         'uchardet'
+         'v4l-utils'
+         'vapoursynth'
+         'vid.stab'
+         'vmaf'
+         'vulkan-icd-loader'
+         'wayland'
+         'x264'
+         'x265'
+         'xdg-utils'
+         'xvidcore'
+         'xz'
+         'zeromq'
+         'zimg'
+         'zlib'
+         'zvbi'
+
+         # AUR:
+         'chromaprint-fftw'
+         )
+license=('GPL-2.0-or-later')
+url='http://mpv.io'
+makedepends=(
+             'git'
+             # local repo: static AVS3 audio (AV3A) decoder SDK
+             'av3a-git'
+             'amf-headers'
+             'clang'
+             'intel-media-sdk'
+             'llvm'
+             'mesa'
+             'meson'
+             'nasm'
+             'opencl-headers'
+             'python-docutils'
+             'vulkan-headers'
+             'wayland-protocols'
+             )
+
+optdepends=('youtube-dl: Another way to view youtuve videos with mpv'
+            'zsh-completions: Additional completion definitions for Zsh users')
+provides=('mpv' 'mpv-git' 'mpv-build-git' 'mpv-full-git' 'libmpv.so=2-64')
+conflicts=('mpv' 'mpv-git' 'mpv-build-git' 'mpv-full-git' 'libmpv.so')
+replaces=('mpv' 'mpv-git' 'mpv-build-git' 'mpv-full-git' 'libmpv.so')
+options=('!emptydirs' 'lto')
+source=('mpv-build::git+https://github.com/mpv-player/mpv-build.git'
+        'mpv::git+https://github.com/mpv-player/mpv.git'
+        'ffmpeg::git+https://github.com/ffmpeg/ffmpeg.git#tag=n9.0.2'
+        'libass::git+https://github.com/libass/libass.git'
+        'libplacebo::git+https://code.videolan.org/videolan/libplacebo.git'
+        'ffnvcodec::git+https://github.com/ffmpeg/nv-codec-headers.git'
+        'LICENSE'
+        # FFmpeg decoder patches (mpv-iina-avs stack, FFmpeg 9.0.2)
+        '0001-libcavs-add-avs-avsplus-dra-base.patch'
+        '0002-libdavs2-export-sequence-display-color-metadata.patch'
+        '0003-libarcdav3a-add-av3a-audio-vivid-decoder.patch'
+        '0004-av3a-container-parser-demux.patch'
+        '0005-av3a-content-probing.patch'
+        '0006-av3a-stream-metadata.patch'
+        '0007-libdavs2-reset-reference-state-on-seek.patch'
+        '0008-libcavs-propagate-output-picture-field-metadata.patch'
+        )
+sha256sums=('SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            '04a7176400907fd7db0d69116b99de49e582a6e176b3bfb36a03e50a4cb26a36'
+            '0211078c3e90996372ae327c4745f04842b85acaaf2684728fb8f105f76fa820'
+            '217dac2e30183caac4d14fff7fba6a40ec5a39baef2cdb8f50672dc4693efe39'
+            'ce91459b0d8c9deb9a3e113878210ec9c2aa7e525735e438ffb80ab10d0fc928'
+            'c84a03f0edaeac5b3fd42691c0a3ce6f067b32afc47b834242f92b0e09297006'
+            '03491e03d0dbc29146f7399b07236d0d912a74dacf58787dcf4af8bfb651e3cb'
+            '19142a8855351499b1c8b2102af969c8ba2aa20f5fffecd86db225209cb786c6'
+            '129257d78e11c128c2ce589b40feabae42a18cb2283d865716c2c060568911b0'
+            'a6a2799f489de84092cf6af082fee7c5b521e7c8a76f75c80af3fd2a483c6b66'
+            )
+backup=('etc/mpv/encoding-profiles.conf')
+
+# MPV_NO_CHECK_OPT_DEPEND
+# if you don't need opt dependency checked, defined this
+# for example
+# MPV_NO_CHECK_OPT_DEPEND=yes makepkg -si
+
+_makeoptdepends=('cuda: mpv ffmpeg nvcc and libnpp support'
+                 'intel-media-sdk: Intel QuickSync support for ffmpeg'
+                 'libklvanc: Additional libklvanc support for ffmpeg'
+                 'nvidia-utils: for hardware accelerated video decoding with CUDA'
+                 'onevpl: mpv ffmpeg intel graphic support'
+                 'shine: Additional libshine support for ffmpeg'
+                 # 'tensorflow: mpv ffmpeg DNN module backend'
+                 'vo-amrwbenc: Additional libvo-amrwbenc support for ffmpeg'
+                 'xavs: Additional libxavs support for ffmpeg'
+                 'xavs2: Additional libxavs2 support for ffmpeg')
+
+for _pkginfo in "${_makeoptdepends[@]}"; do
+  optdepends+=("$_pkginfo")
+done
+
+if [ -z ${MPV_NO_CHECK_OPT_DEPEND+yes} ]; then
+  if [ -f /usr/lib/libklvanc.so ]; then
+    depends+=('libklvanc')
+  fi
+  if [ -f /usr/lib/libshine.so ]; then
+    depends+=('shine')
+  fi
+  if [ -f /usr/lib/libvpl.so ]; then
+    depends+=('onevpl')
+  fi
+  # if [ -f /usr/lib/libtensorflow.so ]; then
+  #   depends+=('tensorflow')
+  # fi
+  if [ -f /usr/lib/libvo-amrwbenc.so ]; then
+    depends+=('vo-amrwbenc')
+  fi
+  if [ -f /usr/lib/libxavs.so ]; then
+    depends+=('xavs')
+  fi
+  if [ -f /usr/lib/libxavs2.so ]; then
+    depends+=('xavs2')
+  fi
+
+  if [ -d /opt/cuda ]; then
+    makedepends+=('cuda')
+    depends+=('cuda')
+  fi
+fi
+
+export CCACHE_DISABLE=1
+export CCACHE_DIR=/tmp/build/ccache
+
+pkgver() {
+  cd mpv
+
+  local _version="$(git tag | sort --version-sort --reverse | head -n1 | sed 's/^v//')"
+  local _revision="$(git rev-list v"${_version}"..HEAD --count)"
+  local _shorthash="$(git rev-parse --short HEAD)"
+  printf '%s.r%s.g%s' "$_version" "$_revision" "$_shorthash"
+
+  # git describe --tags --long | sed 's|^v\(.*\)|\1|;s|\([^-]*-g\)|r\1|;s|-|.|g'
+}
+
+_prepare_ffnvcodec() {
+  make PREFIX=/usr -C "${srcdir}/ffnvcodec"
+  make PREFIX=/usr DESTDIR="${srcdir}" -C "${srcdir}/ffnvcodec" install
+  sed -i "s|=/usr|=${srcdir}/usr|g" "${srcdir}/usr/lib/pkgconfig/ffnvcodec.pc"
+}
+
+prepare() {
+  cd "${srcdir}/ffmpeg"
+  for _patch in "${srcdir}"/[0-9][0-9][0-9][0-9]-*.patch; do
+    patch -Np1 -i "${_patch}"
+  done
+
+  # The AV3A decoder patch embeds its headers (avs3_stat_meta.h, ...) in the
+  # FFmpeg tree; configure's "require" probe compiles from /tmp, so it needs
+  # an explicit include path. CPPFLAGS survives into ffmpeg's build as well,
+  # which keeps this working even when --extra-cflags is overwritten below.
+  export CPPFLAGS="-I${srcdir}/ffmpeg ${CPPFLAGS:-}"
+
+  _prepare_ffnvcodec
+
+  cd mpv-build
+  sed -e 's|meson setup|arch-meson|g' \
+      -e 's|-Dprefer_static=true||g' \
+      -e 's|-Dbuildtype=release||g' \
+      -i scripts/{mpv,libplacebo}-config
+
+  ln -sf -t . "../mpv"
+  ln -sf -t . "../ffmpeg"
+  ln -sf -t . "../libass"
+  ln -sf -t . "../libplacebo"
+
+  # Set ffmpeg/libass/mpv flags
+  _ffmpeg_options=(
+    '--disable-libopencv'
+    '--disable-libtls'
+    '--disable-mbedtls'
+    '--disable-programs'
+    '--enable-alsa'
+    '--enable-amf'
+    '--enable-bzlib'
+    '--enable-chromaprint'
+    '--enable-cuvid'
+    '--enable-ffnvcodec'
+    '--enable-fontconfig'
+    '--enable-frei0r'
+    '--enable-gcrypt'
+    '--enable-gmp'
+    '--enable-gnutls'
+    '--enable-gpl'
+    '--enable-gray'
+    '--enable-iconv'
+    '--enable-ladspa'
+    '--enable-lcms2'
+    '--enable-libaom'
+    '--enable-libaribb24'
+    '--enable-libarcdav3a'
+    '--enable-libass'
+    '--enable-libbluray'
+    '--enable-libbs2b'
+    '--enable-libcaca'
+    '--enable-libcdio'
+    '--enable-libcodec2'
+    '--enable-libdav1d'
+    '--enable-libdavs2'
+    '--enable-libdc1394'
+    '--enable-libdrm'
+    '--enable-libfdk-aac'
+    '--enable-libfreetype'
+    '--enable-libfribidi'
+    '--enable-libgme'
+    '--enable-libgsm'
+    '--enable-libiec61883'
+    '--enable-libilbc'
+    '--enable-libjack'
+    '--enable-libjxl'
+    '--enable-libkvazaar'
+    '--disable-liblensfun'
+    '--enable-libmodplug'
+    '--enable-libmp3lame'
+    '--enable-libmysofa'
+    '--enable-libopencore-amrnb'
+    '--enable-libopencore-amrwb'
+    '--enable-libopenh264'
+    '--enable-libopenjpeg'
+    '--enable-libopenmpt'
+    '--enable-libopus'
+    '--enable-libpulse'
+    '--enable-librabbitmq'
+    '--enable-librav1e'
+    '--enable-librsvg'
+    '--enable-librtmp'
+    '--enable-librubberband'
+    '--enable-libsnappy'
+    '--enable-libsoxr'
+    '--enable-libspeex'
+    '--enable-libsrt'
+    '--enable-libssh'
+    '--enable-libsvtav1'
+    '--disable-libtensorflow'
+    '--enable-libtesseract'
+    '--enable-libtheora'
+    '--enable-libtwolame'
+    '--enable-libuavs3d'
+    '--enable-libv4l2'
+    '--enable-libvidstab'
+    '--enable-libvmaf'
+    '--enable-libvorbis'
+    '--enable-libvpx'
+    '--enable-libwebp'
+    '--enable-libx264'
+    '--enable-libx265'
+    '--enable-libxcb'
+    '--enable-libxcb-shape'
+    '--enable-libxcb-shm'
+    '--enable-libxcb-xfixes'
+    '--enable-libxml2'
+    '--enable-libxvid'
+    '--enable-libzimg'
+    '--enable-libzmq'
+    '--enable-libzvbi'
+    '--enable-lto'
+    '--enable-lv2'
+    '--enable-lzma'
+    '--enable-nonfree'
+    '--enable-nvdec'
+    '--enable-nvenc'
+    '--enable-openal'
+    '--enable-opencl'
+    '--enable-opengl'
+    '--enable-pic'
+    '--enable-sdl2'
+    '--enable-sndio'
+    '--enable-v4l2-m2m'
+    '--enable-vaapi'
+    '--enable-vapoursynth'
+    '--enable-vdpau'
+    '--enable-version3'
+    '--enable-vulkan'
+    '--enable-xlib'
+    '--enable-zlib'
+    "--extra-cflags=-I${srcdir}/ffmpeg"
+  )
+
+  _mpv_options=(
+    '-Db_lto=true'
+    '-Db_staticpic=true'
+    '-Ddefault_library=shared'
+    '-Dc_link_args="-Wl,-Bsymbolic"'
+
+    '-Dcplayer=true'
+    '-Dlibmpv=true'
+    '-Dbuild-date=false'
+
+    # misc features
+    '-Dcdda=enabled'
+    '-Dcplugins=enabled'
+    '-Ddvbin=enabled'
+    '-Ddvda=enabled'
+    '-Ddvdnav=enabled'
+    '-Diconv=enabled'
+    '-Djavascript=enabled'
+    '-Dlcms2=enabled'
+    '-Dlibarchive=enabled'
+    '-Dlibavdevice=enabled'
+    '-Dlibbluray=enabled'
+    '-Dlibcurl=enabled'
+    '-Dlua=lua52'
+    '-Drubberband=enabled'
+    '-Dsdl2-gamepad=enabled'
+    '-Dsubrandr=disabled'
+    '-Duchardet=enabled'
+    '-Duwp=disabled'
+    '-Dvapoursynth=enabled'
+    '-Dvector=auto'
+    '-Dwin32-threads=disabled'
+    '-Dzimg=enabled'
+    '-Dzlib=enabled'
+
+    # audio output features
+    '-Dalsa=enabled'
+    '-Daudiounit=disabled'
+    '-Davfoundation=disabled'
+    '-Dcoreaudio=disabled'
+    '-Djack=enabled'
+    '-Dopenal=enabled'
+    '-Daudiotrack=disabled'
+    '-Daaudio=disabled'
+    '-Dopensles=disabled'
+    '-Doss-audio=disabled'
+    '-Dpipewire=enabled'
+    '-Dpulse=enabled'
+    '-Dsdl2-audio=enabled'
+    '-Dsndio=enabled'
+    '-Dwasapi=disabled'
+
+    # video output features
+    '-Damf=disabled'
+    '-Dcaca=enabled'
+    '-Dcocoa=disabled'
+    '-Dd3d11=disabled'
+    '-Ddirect3d=disabled'
+    '-Ddmabuf-wayland=enabled'
+    '-Ddrm=enabled'
+    '-Degl=enabled'
+    '-Degl-android=disabled'
+    '-Degl-angle=disabled'
+    '-Degl-angle-lib=disabled'
+    '-Degl-angle-win32=disabled'
+    '-Degl-drm=enabled'
+    '-Degl-wayland=enabled'
+    '-Degl-x11=enabled'
+    '-Dgbm=enabled'
+    '-Dgl=enabled'
+    '-Dgl-cocoa=disabled'
+    '-Dgl-dxinterop=disabled'
+    '-Dgl-win32=disabled'
+    '-Djpeg=enabled'
+    '-Dsdl2-video=enabled'
+    '-Dshaderc=disabled'
+    '-Dsixel=enabled'
+    '-Dspirv-cross=disabled'
+    '-Dplain-gl=enabled'
+    '-Dvdpau=enabled'
+    '-Dvaapi=enabled'
+    '-Dvaapi-drm=enabled'
+    '-Dvaapi-wayland=enabled'
+    '-Dvaapi-x11=enabled'
+    '-Dvaapi-win32=disabled'
+    '-Dvulkan=enabled'
+    '-Dwayland=enabled'
+    '-Dx11=enabled'
+    '-Dxv=enabled'
+
+    # hwaccel features
+    '-Dandroid-media-ndk=disabled'
+    '-Dd3d-hwaccel=disabled'
+    '-Dd3d9-hwaccel=disabled'
+    '-Dgl-dxinterop-d3d9=disabled'
+    '-Dios-gl=disabled'
+    '-Dvideotoolbox-gl=disabled'
+    '-Dvideotoolbox-pl=disabled'
+
+    # macOS features
+    '-Dmacos-10-15-4-features=disabled'
+    '-Dmacos-11-features=disabled'
+    '-Dmacos-11-3-features=disabled'
+    '-Dmacos-12-features=disabled'
+    '-Dmacos-cocoa-cb=disabled'
+    '-Dmacos-media-player=disabled'
+    '-Dmacos-touchbar=disabled'
+    '-Dswift-build=disabled'
+
+    # windows features
+    '-Dwin32-smtc=disabled'
+
+    # manpages
+    '-Dmanpage-build=enabled'
+    '-Dhtml-build=disabled'
+    '-Dpdf-build=disabled'
+  )
+
+  _libass_options=(
+    '--enable-harfbuzz'
+    '--enable-fontconfig'
+  )
+
+  _libplacebo_options=(
+    '-Dvulkan=enabled'
+    '-Dglslang=enabled'
+    '-Dshaderc=enabled'
+    '-Dlcms=enabled'
+    '-Dd3d11=disabled'
+  )
+
+  if [ -z ${MPV_NO_CHECK_OPT_DEPEND+yes} ]; then
+    if [ -f /usr/lib/libklvanc.so ]; then
+      _ffmpeg_options+=('--enable-libklvanc')
+    fi
+    if [ -f /usr/lib/libshine.so ]; then
+      _ffmpeg_options+=('--enable-libshine')
+    fi
+    if [ -f /usr/lib/libvpl.so ]; then
+      _ffmpeg_options+=('--enable-libvpl')
+    else
+      _ffmpeg_options+=('--enable-libmfx')
+    fi
+    # if [ -f /usr/lib/libtensorflow.so ]; then
+    #   _ffmpeg_options+=('--enable-libtensorflow')
+    #   _ffmpeg_options+=('--extra-cflags=-I/usr/include/tensorflow')
+    # fi
+    if [ -f /usr/lib/libvo-amrwbenc.so ]; then
+      _ffmpeg_options+=('--enable-libvo-amrwbenc')
+    fi
+    if [ -f /usr/lib/libxavs.so ]; then
+      _ffmpeg_options+=('--enable-libxavs')
+    fi
+    if [ -f /usr/lib/libxavs2.so ]; then
+      _ffmpeg_options+=('--enable-libxavs2')
+    fi
+
+    if [ -d /opt/cuda ]; then
+      export NVCC_PREPEND_FLAGS='-ccbin /opt/cuda/bin/g++'
+      _ffmpeg_options+=('--enable-cuda-nvcc')
+      _ffmpeg_options+=('--enable-cuda-llvm')
+      _ffmpeg_options+=('--enable-libnpp')
+      _ffmpeg_options+=('--extra-cflags=-I/opt/cuda/include')
+      _ffmpeg_options+=('--extra-ldflags=-L/opt/cuda/lib64')
+      _ffmpeg_options+=('--nvccflags=-O2')
+      _mpv_options+=('-Dcuda-hwaccel=enabled')
+      _mpv_options+=('-Dcuda-interop=enabled')
+    fi
+  fi
+
+  (IFS=$'\n'; echo "${_ffmpeg_options[*]}" > ffmpeg_options)
+  (IFS=$'\n'; echo "${_mpv_options[*]}" > mpv_options)
+  (IFS=$'\n'; echo "${_libass_options[*]}" > libass_options)
+  (IFS=$'\n'; echo "${_libplacebo_options[*]}" > libplacebo_options)
+}
+
+build() {
+  export PKG_CONFIG_PATH=${srcdir}/usr/lib/pkgconfig
+
+  cd mpv-build
+  if [ -d /opt/cuda ]; then
+    sed -i 's|scripts/mpv-config|sed \-i "s\|-lavfilter\|-L/opt/cuda/targets/${CARCH}-linux/lib/ -lavfilter\|" build_libs/lib/pkgconfig/libavfilter.pc\nscripts/mpv-config|' "${srcdir}/mpv-build/build"
+  fi
+  ./build
+}
+
+package() {
+  cd mpv-build
+  DESTDIR="${pkgdir}" ./install
+
+  install -Dm755 mpv/TOOLS/mpv_identify.sh "${pkgdir}/usr/bin/mpv-identify"
+  install -Dm755 mpv/TOOLS/idet.sh "${pkgdir}/usr/bin/mpv-idet"
+  install -Dm755 mpv/TOOLS/umpv "${pkgdir}/usr/bin/umpv"
+
+  install -Dm644 mpv/DOCS/encoding.rst "${pkgdir}/usr/share/doc/mpv/encoding.rst"
+  install -Dm644 mpv/DOCS/edl-mpv.rst "${pkgdir}/usr/share/doc/mpv/edl-mpv.rst"
+  install -Dm644 mpv/DOCS/client-api-changes.rst "${pkgdir}/usr/share/doc/mpv/client-api-changes.rst"
+  install -Dm644 mpv/DOCS/contribute.md "${pkgdir}/usr/share/doc/mpv/contribute.md"
+
+  sed 's|/usr/local/etc/mpv.conf|/etc/mpv.conf|g' -i "${pkgdir}/usr/share/doc/mpv/mpv.conf"
+  install -D -m644 "${srcdir}/LICENSE" -t "${pkgdir}/usr/share/licenses/${pkgname}/ffmpeg"
+
+  (cd mpv/TOOLS/lua; for i in $(find . -type f); do install -Dm644 "${i}" "${pkgdir}/usr/share/mpv/scripts/${i}"; done)
+}
