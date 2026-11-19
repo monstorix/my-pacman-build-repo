@@ -61,10 +61,11 @@ raw.githubusercontent.com serves symlinks as their target *text*, which would
 break `pacman -Sy`, so `ci/publish-repo.sh` replaces both links with regular
 copies after every `repo-add`.
 
-Package files are copied in, and only the **two newest builds of each
-package** are kept (pruned by name and mtime before `repo-add --remove
---prevent-downgrade`). `--prevent-downgrade` stops an older build from
-overwriting a newer version in the database.
+Package files are copied in, and only the **newest build of each package** is
+kept. Packages are pruned by name and `vercmp` order before
+`repo-add --remove --prevent-downgrade` runs; `--prevent-downgrade` stops an
+older build from overwriting a newer database entry, and `--remove` deletes
+the superseded package file.
 
 `raw.githubusercontent.com` serves the branch over HTTPS, so pacman needs no
 special transport:

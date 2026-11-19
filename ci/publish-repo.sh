@@ -19,14 +19,24 @@ if ((${#pkgs[@]} == 0)); then
 fi
 cp -f "${pkgs[@]}" "$dest/"
 
-# Keep the repository bounded: only the two newest builds of each package.
+# Keep the repository bounded: only the newest build of each package.
 python3 - "$dest" <<'PY'
+import functools
 import glob
 import os
 import subprocess
 import sys
 
 dest = sys.argv[1]
+
+
+def vercmp(a, b):
+    out = subprocess.run(
+        ["vercmp", a, b], check=True, capture_output=True, text=True
+    ).stdout.strip()
+    return int(out)
+
+
 by_name = {}
 for path in glob.glob(os.path.join(dest, "*.pkg.tar.zst")):
     try:
@@ -36,19 +46,23 @@ for path in glob.glob(os.path.join(dest, "*.pkg.tar.zst")):
         ).stdout
     except subprocess.CalledProcessError:
         continue
-    fields = dict(
-        line.split(" = ", 1)
-        for line in info.splitlines()
-        if line.startswith("pkgname = ") or line.startswith("pkgver = ")
-    )
-    name = fields.get("pkgname")
-    if name:
-        by_name.setdefault(name, []).append(path)
+    fields = {}
+    for line in info.splitlines():
+        for key in ("pkgname", "pkgver"):
+            if line.startswith(key + " = "):
+                fields[key] = line.split(" = ", 1)[1]
+    if fields.get("pkgname") and fields.get("pkgver"):
+        by_name.setdefault(fields["pkgname"], []).append(
+            (fields["pkgver"], path)
+        )
 
-for name, paths in by_name.items():
-    paths.sort(key=os.path.getmtime, reverse=True)
-    for old in paths[2:]:
-        print(f"prune {os.path.basename(old)}")
+for name, entries in by_name.items():
+    # Sort by pacman's version comparison, not mtime: a fresh clone gives every
+    # file the same checkout timestamp.
+    entries.sort(key=functools.cmp_to_key(
+        lambda a, b: vercmp(a[0], b[0])), reverse=True)
+    for ver, old in entries[1:]:
+        print(f"prune {os.path.basename(old)} ({ver})")
         os.unlink(old)
 PY
 
