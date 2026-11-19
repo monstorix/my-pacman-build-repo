@@ -48,6 +48,19 @@ sudo pacman -S mpv-full-build-cavs-git icast-dkms
 `SigLevel` is relaxed because the repository is unsigned. See
 [docs/ci.md](docs/ci.md) if you want to add GPG signing.
 
+## Push to GitHub
+
+This checkout is already a git repository with two commits and no remote.
+After creating an empty GitHub repository:
+
+```bash
+git remote add origin git@github.com:<owner>/<repo>.git
+git push -u origin main
+```
+
+The workflow runs on the next push and creates the `repo` branch on its first
+successful build. Nothing else (secrets, servers) is required.
+
 ## Build locally
 
 ```bash

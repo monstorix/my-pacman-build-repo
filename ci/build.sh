@@ -44,6 +44,24 @@ build_local() {
   )
 }
 
+verify_mpv() {
+  msg "Smoke test: the built mpv exposes the CAVS/AVS decoders"
+  local pkg dir
+  pkg=$(ls -1 "$artifacts"/mpv-full-build-cavs-git-*.pkg.tar.zst | head -n 1)
+  dir=$(mktemp -d)
+  bsdtar -xf "$pkg" -C "$dir" usr/bin/mpv
+  "$dir/usr/bin/mpv" --no-config --version | head -n 2
+  local dec missing=0
+  for dec in libcavs libdavs2 libuavs3d libarcdav3a libdradec; do
+    if ! "$dir/usr/bin/mpv" --no-config --vd=help 2>/dev/null | grep -qw -- "$dec"; then
+      echo "!! decoder $dec is missing from the built mpv" >&2
+      missing=1
+    fi
+  done
+  rm -rf "$dir"
+  [ "$missing" -eq 0 ]
+}
+
 # The patched FFmpeg needs these at configure/link time.
 build_aur chromaprint-fftw
 build_aur uavs3d
@@ -55,6 +73,7 @@ build_local davs2-10bit-git
 # mpv is only built, not installed, but --syncdeps pulls in its repository
 # dependencies. davs2/uavs3d are already satisfied by the packages above.
 build_local mpv-full-build-cavs-git
+verify_mpv
 
 # DKMS package: the module is compiled on the target machine, not here.
 build_local icast-dkms
