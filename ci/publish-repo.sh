@@ -97,4 +97,8 @@ for f in cavs.db cavs.files; do
   cp -f --remove-destination "$f.tar.gz" "$f"
 done
 
+# repo-add keeps the previous database around as *.old; drop those so the
+# published branch only carries the current database.
+rm -f cavs.db.tar.gz.old cavs.files.tar.gz.old
+
 echo "repository updated: $dest"
