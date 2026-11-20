@@ -6,9 +6,9 @@
 #   ci/build.sh package <pkgname>   # one package, plus a smoke test
 #
 # The workflow splits these into separate jobs so that the two long FFmpeg
-# builds (mpv and ffmpeg-full) run in parallel:
+# builds (mpv and ffmpeg-full-git) run in parallel:
 #   deps      -> av3a-git, davs2-10bit-git, chromaprint-fftw, uavs3d
-#   package   -> mpv-full-build-cavs-git, ffmpeg-full-cavs, icast-dkms
+#   package   -> mpv-full-build-cavs-git, ffmpeg-full-git-cavs, icast-dkms
 #
 # Meant to run as a non-root user with sudo rights (GitHub Actions) or on a
 # local machine; no AUR helper is required, the AUR dependencies are built from
@@ -60,13 +60,7 @@ build_local() {
   msg "Package: $name"
   (
     cd "$packages_dir/$name"
-    # ffmpeg-full verifies the release tarball signature. The GitHub runners
-    # do not carry the FFmpeg release key and cannot always reach a keyserver;
-    # the tarball is pinned by sha256 in the PKGBUILD, so skip the PGP check
-    # there. Local builds still verify the signature.
-    local -a extra=()
-    [[ $name == ffmpeg-full-cavs ]] && extra+=(--skippgpcheck)
-    makepkg -f --noconfirm --cleanbuild --syncdeps --nocheck "${extra[@]}"
+    makepkg -f --noconfirm --cleanbuild --syncdeps --nocheck
     if [[ $install == install ]]; then
       # Later packages need these installed: mpv and ffmpeg-full declare
       # "davs2" and "av3a-git" as depends/makedepends, but no pacman
@@ -118,7 +112,7 @@ verify_mpv() {
 verify_ffmpeg() {
   msg "Smoke test: the built ffmpeg exposes the CAVS/AVS decoders"
   local pkg dir out missing=0 dec
-  pkg=$(ls -1 "$artifacts"/ffmpeg-full-cavs-*.pkg.tar.zst | head -n 1)
+  pkg=$(ls -1 "$artifacts"/ffmpeg-full-git-cavs-*.pkg.tar.zst | head -n 1)
   dir=$(mktemp -d)
   bsdtar -xf "$pkg" -C "$dir" usr/bin/ffmpeg usr/lib
   out="$dir/decoders.txt"
@@ -151,7 +145,7 @@ case "$cmd" in
     build_local "$name"
     case "$name" in
       mpv-full-build-cavs-git) verify_mpv ;;
-      ffmpeg-full-cavs) verify_ffmpeg ;;
+      ffmpeg-full-git-cavs) verify_ffmpeg ;;
     esac
     ;;
   *)

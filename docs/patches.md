@@ -1,6 +1,8 @@
 # FFmpeg patch stack and comparison with mpv-iina-avs
 
-The mpv package builds FFmpeg **9.0.2** (`git+.../ffmpeg.git#tag=n9.0.2`) with eight patches taken
+The mpv package builds FFmpeg **9.0.2** (`git+.../ffmpeg.git#tag=n9.0.2`) and
+`ffmpeg-full-git-cavs` builds **FFmpeg master**
+(`git+https://github.com/ffmpeg/ffmpeg.git`); both carry the same eight patches taken
 from [nilaoda/mpv-iina-avs](https://github.com/nilaoda/mpv-iina-avs)
 (`tools/patches/ffmpeg/`). They are vendored next to the PKGBUILD and applied
 in filename order by `prepare()`.
@@ -17,13 +19,24 @@ in filename order by `prepare()`.
 | `0008-libcavs-propagate-output-picture-field-metadata.patch` | Propagates output picture field/interlace metadata from libcavs. |
 
 The same eight patches are used by both `mpv-full-build-cavs-git` (against
-the static FFmpeg it vendors) and `ffmpeg-full-cavs` (against the AUR
-ffmpeg-full tarball, after the AUR patches).
+the static FFmpeg it vendors) and `ffmpeg-full-git-cavs` (against the FFmpeg
+master checkout, after the AUR patches).
+
+When FFmpeg master changes underneath them the patches need a rebase. Two
+hunks were rebased when `ffmpeg-full-git-cavs` was introduced:
+
+- `0001`: `libavcodec/Makefile` now also lists `cavs_aec.o` on the
+  `CONFIG_CAVS_DECODER` line, so the removed-lines hunk was updated.
+- `0004`: `mov_write_audio_tag()` gained the `AV_CODEC_ID_MPEGH_3D_AUDIO`
+  branch between `AV_CODEC_ID_TRUEHD` and `MOV_MP4_IPCM_TAG`; the AV3A branch
+  is now inserted after it.
 
 ## Verification performed
 
 - All eight patches apply to a pristine FFmpeg 9.0.2 tree in order, with no
-  fuzz and no rejects.
+  fuzz and no rejects. All twelve (AUR 010/030/040/050 + these eight) also
+  apply in order to FFmpeg master `7ddf7bc` (2026-11-20), and the patched
+  master configures and compiles with the five decoders enabled.
 - A minimal configuration enabling only the new decoders
   (`--enable-libarcdav3a --enable-libdavs2 --enable-libuavs3d
   --enable-decoder=cavs,libdra,libdavs2,libuavs3d,libarcdav3a`) configures with

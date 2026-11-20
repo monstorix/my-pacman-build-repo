@@ -32,6 +32,14 @@ if ((${#pkgs[@]} == 0)); then
 fi
 cp -f "${pkgs[@]}" "$dest/"
 
+# Packages that were renamed or dropped.  Their files and database entries
+# would otherwise stay in the repository branch forever.
+retired=(ffmpeg-full-cavs)
+for name in "${retired[@]}"; do
+  rm -f "$dest/$name"-*.pkg.tar.zst
+  repo-remove --quiet "$dest/cavs.db.tar.gz" "$name" 2>/dev/null || true
+done
+
 # Keep the repository bounded: only the newest build of each package.
 python3 - "$dest" <<'PY'
 import functools

@@ -1340,10 +1340,12 @@ index aacde4e..2b8d30e 100644
  static int mov_write_SA3D_tag(AVFormatContext *s, AVIOContext *pb, MOVTrack *track)
  {
      const AVDictionaryEntry *str = av_dict_get(track->st->metadata, "SA3D", NULL, 0);
-@@ -1518,6 +1587,8 @@ static int mov_write_audio_tag(AVFormatContext *s, AVIOContext *pb, MOVMuxContex
+@@ -1518,8 +1589,10 @@ static int mov_write_audio_tag(AVFormatContext *s, AVIOContext *pb, MOVMuxContex
          ret = mov_write_dops_tag(s, pb, track);
      else if (track->par->codec_id == AV_CODEC_ID_TRUEHD)
          ret = mov_write_dmlp_tag(s, pb, track);
+     else if (track->par->codec_id == AV_CODEC_ID_MPEGH_3D_AUDIO)
+         ret = mov_write_mhac_tag(s, pb, track);
 +    else if (track->par->codec_id == AV_CODEC_ID_AV3A)
 +        ret = mov_write_dca3_tag(s, pb, track);
      else if (tag == MOV_MP4_IPCM_TAG || tag == MOV_MP4_FPCM_TAG) {

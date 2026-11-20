@@ -7,11 +7,13 @@ Personal Arch Linux packaging for two things:
    DRA audio — the same decoder stack used by
    [nilaoda/mpv-iina-avs](https://github.com/nilaoda/mpv-iina-avs) on macOS,
    adapted to Linux/x86_64.
-2. **ffmpeg-full-cavs**: the AUR `ffmpeg-full` 9.0.2 feature set (shared
+2. **ffmpeg-full-git-cavs**: the AUR `ffmpeg-full-git` feature set (shared
    libraries, CUDA/NVENC, svt-av1/hevc/vp9, gnutls, lensfun, whisper, …) with
    the same decoder patch stack, as a drop-in replacement for the official
-   `ffmpeg` package. Non-free components such as **libfdk-aac are disabled** in
-   the default and in every automated build.
+   `ffmpeg` package. It tracks FFmpeg **master** (like the mpv package does
+   with the FFmpeg it vendors) instead of a tagged release, so it does not wait
+   for the AUR maintainer to bump a stable version. Non-free components such as
+   **libfdk-aac are disabled** in the default and in every automated build.
 3. **iCast DKMS**: an out-of-tree driver for the SMIT (国微) iCast USB
    DVB-T2/C adapter (`29df:0001`), built automatically for every installed
    kernel.
@@ -28,7 +30,7 @@ or inherited remotes; the working files are untouched.
 ```
 packages/
   mpv-full-build-cavs-git/   mpv + static FFmpeg 9.0.2 + 8 decoder patches
-  ffmpeg-full-cavs/          shared FFmpeg 9.0.2 (AUR ffmpeg-full) + same patches
+  ffmpeg-full-git-cavs/      shared FFmpeg, master branch (AUR ffmpeg-full-git) + same patches
   davs2-10bit-git/           AVS2 10-bit decoder (provides davs2)
   av3a-git/                  AVS3 audio reference decoder + binaural renderer
   icast-dkms/                SMIT iCast DVB-T2/C USB driver (DKMS)
@@ -57,7 +59,7 @@ sudo pacman -S mpv-full-build-cavs-git icast-dkms
 
 # Optional: replace the official ffmpeg with the patched full build.
 # It provides and conflicts with ffmpeg, so pacman asks to remove that first.
-sudo pacman -S ffmpeg-full-cavs
+sudo pacman -S ffmpeg-full-git-cavs
 ```
 
 The iCast driver loads by itself: a `modprobe.d` softdep loads
@@ -93,7 +95,7 @@ sudo pacman -S --needed base-devel git dkms linux-headers
 cd packages/av3a-git           && makepkg -si
 cd ../davs2-10bit-git          && makepkg -si
 cd ../mpv-full-build-cavs-git  && makepkg -si
-cd ../ffmpeg-full-cavs         && makepkg -si   # optional, replaces ffmpeg
+cd ../ffmpeg-full-git-cavs         && makepkg -si   # optional, replaces ffmpeg
 cd ../icast-dkms               && makepkg -si
 ```
 
@@ -110,11 +112,12 @@ Details, ordering and troubleshooting: [docs/local-build.md](docs/local-build.md
 
 ## Status
 
-- FFmpeg 9.0.2 with all eight patches configures and compiles cleanly; all
-  four PKGBUILDs pass `namcap` with no errors.
+- FFmpeg 9.0.2 (mpv) and current FFmpeg master (ffmpeg-full-git-cavs) with all
+  twelve patches configure and compile cleanly; all PKGBUILDs pass `namcap`
+  with no errors.
 - `icast-dkms` builds, packages and compiles its modules against the running
   CachyOS kernel (clang-built kernels handled via `LLVM=1`).
-- The complete `makepkg` run for mpv and ffmpeg-full-cavs is not possible on
+- The complete `makepkg` run for mpv and ffmpeg-full-git-cavs is not possible on
   the author's machine (no root, many build-only dependencies missing); the CI
   workflow performs the full builds, in parallel.
 
@@ -126,7 +129,7 @@ Details, ordering and troubleshooting: [docs/local-build.md](docs/local-build.md
 - av3a-git: the upstream snapshot carries **no license file**; the package is
   tagged `LicenseRef-proprietary` and is intended for personal use only. Do not
   redistribute the built binaries without clarifying the license.
-- ffmpeg-full-cavs: GPL-3.0-or-later. The default build has no non-free
+- ffmpeg-full-git-cavs: GPL-3.0-or-later. The default build has no non-free
   components; `--enable-nonfree`/libfdk-aac are opt-in via `FFMPEG_NONFREE=1`
   for personal builds only (see [docs/ci.md](docs/ci.md)).
 - Nothing non-free is ever committed to this repository or published to the

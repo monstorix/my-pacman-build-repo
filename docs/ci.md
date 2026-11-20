@@ -18,7 +18,7 @@ for each other:
 | Job | Contents | Timeout |
 |---|---|---|
 | `deps` | builds `chromaprint-fftw` and `uavs3d` from the AUR, plus `av3a-git` and `davs2-10bit-git`; uploads `deps-packages` | 90 min |
-| `build` (matrix) | one job each for `mpv-full-build-cavs-git` and `ffmpeg-full-cavs`: installs `deps-packages`, builds its single package, smoke-tests it, uploads `<package>-packages` | 350 min |
+| `build` (matrix) | one job each for `mpv-full-build-cavs-git` and `ffmpeg-full-git-cavs`: installs `deps-packages`, builds its single package, smoke-tests it, uploads `<package>-packages` | 350 min |
 | `icast` | builds `icast-dkms` (does not depend on either FFmpeg) | 30 min |
 | `publish` | downloads every `*-packages` artifact and runs `ci/push-repo.sh` once | 30 min |
 
@@ -27,10 +27,11 @@ namcap`, creates a `builder` user with passwordless sudo and chowns the
 workspace (the checkout is owned by root). The two matrix jobs install the
 dependency packages with `pacman -U` before `makepkg --syncdeps` runs, so the
 local `davs2` / `av3a-git` names resolve. The ffmpeg job also removes the CUDA
-Nsight debuggers (several GB) before building.
+Nsight debuggers (several GB) before building. `ffmpeg-full-git-cavs` has no
+signed release tarball anymore, so no `--skippgpcheck` is needed.
 
 Smoke tests: the mpv package must list `cavs`, `libdavs2` and `libuavs3d` in
-`--vd=help` and `libdra`, `libarcdav3a` in `--ad=help`; `ffmpeg-full-cavs`
+`--vd=help` and `libdra`, `libarcdav3a` in `--ad=help`; `ffmpeg-full-git-cavs`
 must list the same five in `-decoders`. A missing decoder fails the job.
 
 `namcap` runs on the PKGBUILDs and packages (`|| true`: it is a report, not a
@@ -123,8 +124,9 @@ implicitly through `GITHUB_REPOSITORY`.
 ## Costs and scheduling
 
 A full run takes roughly 1.5–3 hours: the `deps` job is a few minutes, then
-mpv (~15 min) and ffmpeg-full (the longest step, because of LTO and the ~100
-codecs) run concurrently, and the DKMS package finishes in about a minute. On a **public**
+mpv (~15 min) and ffmpeg-full-git (the longest step, because it clones the
+whole FFmpeg history for `pkgver()`, then does LTO over ~100 codecs) run
+concurrently, and the DKMS package finishes in about a minute. On a **public**
 repository Actions minutes are free. On a **private** repository the free
 plan includes 2000 minutes/month, which is about 4–6 full runs — the weekly
 schedule fits, but manual runs should be used sparingly. Reducing the matrix

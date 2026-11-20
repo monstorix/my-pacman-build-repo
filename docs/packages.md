@@ -5,7 +5,7 @@ All packages are built from source with `makepkg`. The dependency graph is:
 ```
 uavs3d (AUR, 8+10-bit shared) ─┬─> mpv-full-build-cavs-git (static FFmpeg link)
 chromaprint-fftw (AUR) ────────┤
-av3a-git (local, static) ──────┴─> ffmpeg-full-cavs (shared FFmpeg)
+av3a-git (local, static) ──────┴─> ffmpeg-full-git-cavs (shared FFmpeg)
 davs2-10bit-git (local) ──> both
 icast-dkms ──> dkms, linux-headers
 ```
@@ -30,29 +30,40 @@ these changes:
 
 Provided soname: `libmpv.so=2-64`.
 
-## ffmpeg-full-cavs
+## ffmpeg-full-git-cavs
 
-A shared-library FFmpeg built from the AUR `ffmpeg-full` 9.0.2 recipe
-(`pkgrel=1` here). The AUR patches (010, 020, 030, 040, 050, 060, 070) are
-applied first, then the same eight decoder patches as the mpv package. On top
-of the `--enable-libdavs2` / `--enable-libuavs3d` that ffmpeg-full already
-enables, it adds `--enable-libarcdav3a`; `av3a-git` is a `makedepends`.
+A shared-library FFmpeg built from the AUR `ffmpeg-full-git` recipe, i.e.
+from `git+https://github.com/ffmpeg/ffmpeg.git` (master) rather than a tagged
+release: `pkgver()` produces `9.x.rNNNNN.gHASH` and every scheduled CI run
+picks up whatever upstream has merged. This is the same "track git" approach
+the mpv package uses for the FFmpeg it vendors, and it avoids waiting for the
+AUR maintainer to bump the stable `ffmpeg-full`.
+
+The AUR patches (010, 020, 030, 040, 050, 060, 070) are applied first, then
+the same eight decoder patches as the mpv package. On top of the
+`--enable-libdavs2` / `--enable-libuavs3d` that ffmpeg-full enables, it adds
+`--enable-libarcdav3a` (and `--enable-libcurl`, new in the git recipe);
+`av3a-git` is a `makedepends`.
 
 It `provides` and `conflicts` with `ffmpeg` (plus the `libav*.so` names), so
 installing it replaces the official package. mpv is unaffected: it statically
 links its own FFmpeg.
 
-Sixteen ffmpeg-full features are disabled because their libraries exist only
-in the AUR and would drag ~16 extra source recipes into unattended CI:
+Nineteen ffmpeg-full features are disabled because their libraries exist only
+in the AUR and would drag ~19 extra source recipes into unattended CI:
 
 ```
-decklink-sdk flite1 lcevcdec libklvanc mpeghdec openapv opencv4 quirc
-libaribcaption shine rockchip-mpp svt-jpeg-xs vo-amrwbenc vvenc xavs
+astc-encoder decklink-sdk flite1 lcevcdec libklvanc mpeghdec openapv opencv4
+quirc libaribcaption shine rockchip-mpp svt-jpeg-xs vo-amrwbenc vvenc xavs
 xavs2 xevd xeve
 ```
 
+`astc-encoder` is new in the git recipe (it enables `--enable-libastcenc`);
+`--enable-libcurl` is kept because `curl` is in the official repositories.
+
 The removed `depends`, patches and `--enable-*` lines are recorded in a
-comment at the top of the PKGBUILD; restore them (and install the AUR
+comment at the top of the PKGBUILD (`--enable-libastcenc` and its
+`astc-encoder` dependency included); restore them (and install the AUR
 packages) for a truly complete build. Everything available in the official
 repositories stays enabled: CUDA/NVENC/NVDEC, svt-av1, svt-hevc, svt-vp9,
 vulkan, vaapi, vdpau, whisper, lensfun, x264/x265, dav1d, rav1e and the rest

@@ -75,7 +75,7 @@ jobs:
       matrix:
         package:
           - mpv-full-build-cavs-git
-          - ffmpeg-full-cavs
+          - ffmpeg-full-git-cavs
     runs-on: ubuntu-latest
     container:
       image: archlinux:latest
@@ -110,7 +110,7 @@ jobs:
       # CUDA is a build dependency of ffmpeg-full; its bundled Nsight
       # debuggers take gigabytes that the runner does not need.
       - name: Trim the CUDA toolkit
-        if: matrix.package == 'ffmpeg-full-cavs'
+        if: matrix.package == 'ffmpeg-full-git-cavs'
         run: |
           pacman -S --noconfirm --needed cuda
           rm -rf /opt/cuda/nsight* /opt/cuda/samples /opt/cuda/extras

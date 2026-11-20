@@ -20,11 +20,12 @@ cd packages
 ( cd av3a-git           && makepkg -si )   # static AVS3 audio libs
 ( cd davs2-10bit-git    && makepkg -si )   # replaces davs2 / davs2-git
 ( cd mpv-full-build-cavs-git && makepkg -si )
-( cd ffmpeg-full-cavs    && makepkg -si )   # optional, replaces ffmpeg
+( cd ffmpeg-full-git-cavs    && makepkg -si )   # optional, replaces ffmpeg
 ( cd icast-dkms         && makepkg -si )
 ```
 
-`ffmpeg-full-cavs` is the AUR `ffmpeg-full` feature set with the same decoder
+`ffmpeg-full-git-cavs` is the AUR `ffmpeg-full-git` feature set (FFmpeg
+master, `pkgver` like `9.1.r128247.g11ef8d60d6`) with the same decoder
 patches. It pulls in ~110 build dependencies (including `cuda`) and
 `provides`/`conflicts` with `ffmpeg`, so `makepkg -si` asks before replacing
 the official package. Skip it if you only need mpv.
@@ -57,7 +58,7 @@ Test files: any AVS/AVS+ (`.avs`), AVS2 10-bit, AVS3, and AV3A-in-TS sample.
 For a quick sanity check `mpv --no-config --vo=null --ao=null file.ts` should
 decode without "Could not open codec" errors.
 
-## Verifying the ffmpeg-full-cavs build
+## Verifying the ffmpeg-full-git-cavs build
 
 ```bash
 ffmpeg -hide_banner -decoders | grep -E 'cavs|libdavs2|libuavs3d|libarcdav3a|libdra'
@@ -75,7 +76,7 @@ can be enabled for a personal build:
 
 ```bash
 sudo pacman -S libfdk-aac
-FFMPEG_NONFREE=1 makepkg -si          # in ffmpeg-full-cavs or mpv-full-build-cavs-git
+FFMPEG_NONFREE=1 makepkg -si          # in ffmpeg-full-git-cavs or mpv-full-build-cavs-git
 ```
 
 Do not redistribute the result. The same builds are available from a manual
