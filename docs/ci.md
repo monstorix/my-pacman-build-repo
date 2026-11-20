@@ -40,6 +40,16 @@ gate). Artifacts are kept for 7 days.
 The workflow needs `permissions: contents: write`; it uses the built-in
 `GITHUB_TOKEN`, no additional secret is required.
 
+## Non-free builds (artifacts only)
+
+The default build is free: `--enable-nonfree` and `libfdk-aac` are not
+enabled anywhere, so everything the workflow publishes can be redistributed.
+For personal use, run the workflow manually with **nonfree** checked
+(`workflow_dispatch`). That run installs `libfdk-aac`, passes
+`FFMPEG_NONFREE=1` to both FFmpeg builds, uploads the packages as
+`<pkg>-packages-nonfree`, and **skips the publish job** — those binaries never
+enter git. Download them from the run page and `pacman -U` them yourself.
+
 ## The `repo` branch
 
 `ci/push-repo.sh` checks out (or creates as an orphan) the `repo` branch,

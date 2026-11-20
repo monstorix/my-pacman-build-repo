@@ -9,7 +9,7 @@ _whispercpp_ver='1.9.5'
 pkgdesc='FFmpeg with CAVS/AVS2/AVS3/AV3A and DRA decoding, built from the ffmpeg-full feature set'
 arch=('x86_64')
 url='https://ffmpeg.org/'
-license=('LicenseRef-nonfree-and-unredistributable')
+license=('GPL-3.0-or-later')
 depends=(
     'alsa-lib'
     'aom'
@@ -35,7 +35,6 @@ depends=(
     'ladspa' # loaded on-demand by dlopen()
     'lame'
     'lcms2'
-    'libaribcaption'
     'libass'
     'libavc1394'
     'libbluray'
@@ -46,7 +45,6 @@ depends=(
     'libdrm'
     'libdvdnav'
     'libdvdread'
-    'libfdk-aac'
     'libgcc'
     'libgcrypt'
     'libgme'
@@ -93,7 +91,6 @@ depends=(
     'rtmpdump'
     'rubberband'
     'sdl2'
-    'shine'
     'smbclient'
     'snappy'
     'sndio'
@@ -256,6 +253,16 @@ build() {
     export CFLAGS+=' -isystem/opt/cuda/include'
     export LDFLAGS+=' -L/opt/cuda/lib64'
     
+    # Non-free components (libfdk-aac) are opt-in and never used by the
+    # automated builds.  They make the result non-redistributable, so the CI
+    # publishes them as artifacts only.  Local: install libfdk-aac, then run
+    #   FFMPEG_NONFREE=1 makepkg -s
+    local -a _nonfree_opts=()
+    if [[ ${FFMPEG_NONFREE:-0} == 1 ]]; then
+        pkg-config --exists fdk-aac || error "FFMPEG_NONFREE=1 requires libfdk-aac"
+        _nonfree_opts=(--enable-nonfree --enable-libfdk-aac)
+    fi
+
     # fix build of libavfilter/asrc_flite.c with gcc 14
     export CFLAGS+=' -Wno-error=incompatible-pointer-types'
     
@@ -266,7 +273,7 @@ build() {
         --disable-rpath \
         --enable-gpl \
         --enable-version3 \
-        --enable-nonfree \
+        "${_nonfree_opts[@]}" \
         --enable-shared \
         --disable-static \
         --disable-stripping \
@@ -287,7 +294,6 @@ build() {
         --enable-lcms2 \
         --enable-libaom \
         --enable-libaribb24 \
-        --enable-libaribcaption \
         --enable-libass \
         --enable-libbluray \
         --enable-libbs2b \
@@ -299,7 +305,6 @@ build() {
         --enable-libdc1394 \
         --enable-libdvdnav \
         --enable-libdvdread \
-        --enable-libfdk-aac \
         --enable-libfontconfig \
         --enable-libfreetype \
         --enable-libfribidi \
@@ -333,7 +338,6 @@ build() {
         --enable-librsvg \
         --enable-librubberband \
         --enable-librtmp  \
-        --enable-libshine \
         --enable-libsmbclient \
         --enable-libsnappy \
         --enable-libsoxr \

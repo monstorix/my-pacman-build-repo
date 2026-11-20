@@ -12,6 +12,11 @@ on:
       - "ci/**"
       - ".github/workflows/**"
   workflow_dispatch:
+    inputs:
+      nonfree:
+        description: "Build with non-free components (libfdk-aac). Artifacts only, never published."
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -98,6 +103,10 @@ jobs:
       - name: Install dependency packages
         run: pacman -U --noconfirm --needed deps-pkgs/*.pkg.tar.zst
 
+      - name: Install non-free build dependencies
+        if: inputs.nonfree
+        run: pacman -S --noconfirm --needed libfdk-aac
+
       # CUDA is a build dependency of ffmpeg-full; its bundled Nsight
       # debuggers take gigabytes that the runner does not need.
       - name: Trim the CUDA toolkit
@@ -108,7 +117,11 @@ jobs:
           pacman -Scc --noconfirm
 
       - name: Build ${{ matrix.package }}
-        run: sudo -u builder -H env MAKEFLAGS="-j$(nproc)" bash ci/build.sh package ${{ matrix.package }}
+        env:
+          # Non-free components are opt-in, and the resulting packages are
+          # never pushed to the repository branch (see the publish job).
+          FFMPEG_NONFREE: ${{ inputs.nonfree && '1' || '0' }}
+        run: sudo -u builder -H env MAKEFLAGS="-j$(nproc)" FFMPEG_NONFREE="${FFMPEG_NONFREE}" bash ci/build.sh package ${{ matrix.package }}
 
       - name: Namcap check
         if: always()
@@ -122,7 +135,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.package }}-packages
+          name: ${{ matrix.package }}-packages${{ inputs.nonfree && '-nonfree' || '' }}
           path: artifacts/*.pkg.tar.zst
           if-no-files-found: ignore
           retention-days: 7
@@ -162,7 +175,9 @@ jobs:
   # commit, so parallel build jobs never race on the same remote ref.
   publish:
     needs: [build, icast]
-    if: github.event_name != 'pull_request'
+    # Non-free builds are for manual download only: they must never end up in
+    # the git-hosted repository.
+    if: github.event_name != 'pull_request' && inputs.nonfree != true
     runs-on: ubuntu-latest
     container:
       image: archlinux:latest

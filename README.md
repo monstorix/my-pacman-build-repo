@@ -8,8 +8,10 @@ Personal Arch Linux packaging for two things:
    [nilaoda/mpv-iina-avs](https://github.com/nilaoda/mpv-iina-avs) on macOS,
    adapted to Linux/x86_64.
 2. **ffmpeg-full-cavs**: the AUR `ffmpeg-full` 9.0.2 feature set (shared
-   libraries, CUDA/NVENC, svt-av1/hevc/vp9, fdk-aac, …) with the same decoder
-   patch stack, as a drop-in replacement for the official `ffmpeg` package.
+   libraries, CUDA/NVENC, svt-av1/hevc/vp9, gnutls, lensfun, whisper, …) with
+   the same decoder patch stack, as a drop-in replacement for the official
+   `ffmpeg` package. Non-free components such as **libfdk-aac are disabled** in
+   the default and in every automated build.
 3. **iCast DKMS**: an out-of-tree driver for the SMIT (国微) iCast USB
    DVB-T2/C adapter (`29df:0001`), built automatically for every installed
    kernel.
@@ -124,7 +126,8 @@ Details, ordering and troubleshooting: [docs/local-build.md](docs/local-build.md
 - av3a-git: the upstream snapshot carries **no license file**; the package is
   tagged `LicenseRef-proprietary` and is intended for personal use only. Do not
   redistribute the built binaries without clarifying the license.
-- ffmpeg-full-cavs: inherits the `ffmpeg-full` license tag
-  (`LicenseRef-nonfree-and-unredistributable`) because it links `libfdk-aac`
-  and enables other nonfree components (`--enable-nonfree`). Treat the built
-  binaries as personal-use only.
+- ffmpeg-full-cavs: GPL-3.0-or-later. The default build has no non-free
+  components; `--enable-nonfree`/libfdk-aac are opt-in via `FFMPEG_NONFREE=1`
+  for personal builds only (see [docs/ci.md](docs/ci.md)).
+- Nothing non-free is ever committed to this repository or published to the
+  `repo` branch.

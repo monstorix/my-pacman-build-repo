@@ -68,6 +68,20 @@ The decoder names are `cavs` (AVS1/AVS+), `libdavs2`, `libuavs3d`,
 `libarcdav3a` (AV3A) and `libdra`; `libcavs` and `libdradec` are *not*
 registered names. `ffmpeg -h decoder=cavs` should print the codec help.
 
+## Optional: non-free components
+
+Both FFmpeg builds are free by default. `libfdk-aac` and `--enable-nonfree`
+can be enabled for a personal build:
+
+```bash
+sudo pacman -S libfdk-aac
+FFMPEG_NONFREE=1 makepkg -si          # in ffmpeg-full-cavs or mpv-full-build-cavs-git
+```
+
+Do not redistribute the result. The same builds are available from a manual
+`nonfree` workflow run; download the `*-nonfree` artifacts and `pacman -U`
+them by hand.
+
 ## DKMS package
 
 `icast-dkms` installs sources into `/usr/src/icast-1.0.0` and registers

@@ -47,19 +47,30 @@ in the AUR and would drag ~16 extra source recipes into unattended CI:
 
 ```
 decklink-sdk flite1 lcevcdec libklvanc mpeghdec openapv opencv4 quirc
-rockchip-mpp svt-jpeg-xs vo-amrwbenc vvenc xavs xavs2 xevd xeve
+libaribcaption shine rockchip-mpp svt-jpeg-xs vo-amrwbenc vvenc xavs
+xavs2 xevd xeve
 ```
 
 The removed `depends`, patches and `--enable-*` lines are recorded in a
 comment at the top of the PKGBUILD; restore them (and install the AUR
 packages) for a truly complete build. Everything available in the official
-repositories stays enabled: libfdk-aac/nonfree, CUDA/NVENC/NVDEC, svt-av1,
-svt-hevc, svt-vp9, vulkan, vaapi, vdpau, whisper, lensfun, x264/x265, dav1d,
-rav1e and the rest of the ffmpeg-full feature list.
+repositories stays enabled: CUDA/NVENC/NVDEC, svt-av1, svt-hevc, svt-vp9,
+vulkan, vaapi, vdpau, whisper, lensfun, x264/x265, dav1d, rav1e and the rest
+of the ffmpeg-full feature list. libfdk-aac (non-free) is opt-in, see below.
 
-License: `LicenseRef-nonfree-and-unredistributable`, inherited from
-ffmpeg-full because of `--enable-nonfree` and libfdk-aac; treat the binaries
-as personal use only.
+Non-free components are **off**: `libfdk-aac`, `--enable-nonfree` and the
+other entries that ffmpeg-full marks non-free are removed from `depends` and
+from the `./configure` line, so the package is redistributable
+(`GPL-3.0-or-later`). A personal build can opt back in:
+
+```bash
+sudo pacman -S libfdk-aac
+FFMPEG_NONFREE=1 makepkg -si
+```
+
+The same switch works for `mpv-full-build-cavs-git` (its static FFmpeg). The
+result is then non-redistributable and must stay local; the CI artifacts of a
+`nonfree` workflow run are never published to the `repo` branch.
 
 ## davs2-10bit-git
 

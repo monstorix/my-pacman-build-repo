@@ -52,8 +52,7 @@ depends=(
          'libdrm'
          'libdvdnav'
          'libdvdread'
-         'libfdk-aac'
-         'libgcrypt'
+          'libgcrypt'
          'libgl'
          'libglvnd'
          'libgme'
@@ -323,7 +322,6 @@ prepare() {
     '--enable-libdavs2'
     '--enable-libdc1394'
     '--enable-libdrm'
-    '--enable-libfdk-aac'
     '--enable-libfreetype'
     '--enable-libfribidi'
     '--enable-libgme'
@@ -380,7 +378,6 @@ prepare() {
     '--enable-lto'
     '--enable-lv2'
     '--enable-lzma'
-    '--enable-nonfree'
     '--enable-nvdec'
     '--enable-nvenc'
     '--enable-openal'
@@ -572,6 +569,13 @@ prepare() {
 
   (IFS=$'\n'; echo "${_ffmpeg_options[*]}" > ffmpeg_options)
   (IFS=$'\n'; echo "${_mpv_options[*]}" > mpv_options)
+  # Non-free components are opt-in only (FFMPEG_NONFREE=1) and are never
+  # enabled by the automated builds: libfdk-aac cannot be redistributed.
+  # Install libfdk-aac yourself before setting the variable.
+  if [[ ${FFMPEG_NONFREE:-0} == 1 ]]; then
+    _ffmpeg_options+=('--enable-nonfree' '--enable-libfdk-aac')
+  fi
+
   (IFS=$'\n'; echo "${_libass_options[*]}" > libass_options)
   (IFS=$'\n'; echo "${_libplacebo_options[*]}" > libplacebo_options)
 }
