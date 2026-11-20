@@ -6,6 +6,7 @@ pkgver=9.1.r129150.g7ddf7bc8a4
 pkgrel=1
 _svt_hevc_ver='4181c9ee0611baefb40b4c0ed10023cfd837d522'
 _whispercpp_ver='1.9.5'
+_amf_ver='1.5.3'
 pkgdesc='FFmpeg with CAVS/AVS2/AVS3/AV3A and DRA decoding, built from the ffmpeg-full feature set (git version)'
 arch=('x86_64')
 url='https://ffmpeg.org/'
@@ -120,7 +121,6 @@ optdepends=(
     'nvidia-utils: for NVIDIA CUVID/NVDEC/NVENC support'
     'vpl-runtime: for Intel Quick Sync Video')
 makedepends=(
-    'amf-headers'
     'clang'
     'cmake'
     'cuda'
@@ -159,6 +159,7 @@ conflicts=('ffmpeg' 'ffmpeg-full' 'ffmpeg-git' 'ffmpeg-full-cavs')
 source=('git+https://github.com/ffmpeg/ffmpeg.git'
         'git+https://github.com/lensfun/lensfun.git'
         "https://github.com/ggml-org/whisper.cpp/archive/v${_whispercpp_ver}/whisper.cpp-${_whispercpp_ver}.tar.gz"
+        "amf-headers-${_amf_ver}.tar.gz::https://github.com/GPUOpen-LibrariesAndSDKs/AMF/archive/refs/tags/v${_amf_ver}.tar.gz"
         '010-ffmpeg-add-svt-hevc.patch'
         "020-ffmpeg-add-svt-hevc-docs-g${_svt_hevc_ver:0:7}.patch"::"https://raw.githubusercontent.com/OpenVisualCloud/SVT-HEVC/${_svt_hevc_ver}/ffmpeg_plugin/0002-doc-Add-libsvt_hevc-encoder-docs.patch"
         '030-ffmpeg-add-svt-vp9.patch'
@@ -175,7 +176,8 @@ source=('git+https://github.com/ffmpeg/ffmpeg.git'
         '0007-libdavs2-reset-reference-state-on-seek.patch'
         '0008-libcavs-propagate-output-picture-field-metadata.patch'
         'LICENSE')
-sha256sums=('SKIP' 'SKIP' 'ff1a9053feb509ff9d7729703355541ae9690073a6b1c40eb692c962e0dc1720' 'bf222066441afd11473dc755a6dcaacfa78a7b0a1f3bcb95d36ce54fc95f96e2' 'a164ebdc4d281352bf7ad1b179aae4aeb33f1191c444bed96cb8ab333c046f81' 'b55beed25b9377e0c9c9727e19307f219c6d750094ac37a38887309e26e4b116' '141981e5596b6f7031825f117036fe152121c255ea3be7b3baf8871a87f64599' '15d4ed10bfcb6a5f9bc1c22db2ba549c246082b48dfa907ae9fcf6451e243d65' 'c39addf190d25d1182c5c5658677f77ee7c1ae542969b2004441c62a425d324b' '2c846c629ad129ae8ce50791de4f1d390714db6d6420a35406b83b9b44999d4a' 'dfab9f504359640dcaa2b90ef3ff86c649aef8e0a2cce571acac5725637d692d' '217dac2e30183caac4d14fff7fba6a40ec5a39baef2cdb8f50672dc4693efe39' 'ce91459b0d8c9deb9a3e113878210ec9c2aa7e525735e438ffb80ab10d0fc928' 'f4a0682495d4afe46fb718a0b2b3af1de723ecd63d195f75f5a855d7adfed804' '03491e03d0dbc29146f7399b07236d0d912a74dacf58787dcf4af8bfb651e3cb' '19142a8855351499b1c8b2102af969c8ba2aa20f5fffecd86db225209cb786c6' '129257d78e11c128c2ce589b40feabae42a18cb2283d865716c2c060568911b0' 'a6a2799f489de84092cf6af082fee7c5b521e7c8a76f75c80af3fd2a483c6b66' '04a7176400907fd7db0d69116b99de49e582a6e176b3bfb36a03e50a4cb26a36')
+sha256sums=('SKIP' 'SKIP' 'ff1a9053feb509ff9d7729703355541ae9690073a6b1c40eb692c962e0dc1720'
+             'eb7d7d14c239117478f229cf174dc359fa2ba1e0817a7cb16277cc5251709f0f' 'bf222066441afd11473dc755a6dcaacfa78a7b0a1f3bcb95d36ce54fc95f96e2' 'a164ebdc4d281352bf7ad1b179aae4aeb33f1191c444bed96cb8ab333c046f81' 'b55beed25b9377e0c9c9727e19307f219c6d750094ac37a38887309e26e4b116' '141981e5596b6f7031825f117036fe152121c255ea3be7b3baf8871a87f64599' '15d4ed10bfcb6a5f9bc1c22db2ba549c246082b48dfa907ae9fcf6451e243d65' 'c39addf190d25d1182c5c5658677f77ee7c1ae542969b2004441c62a425d324b' '2c846c629ad129ae8ce50791de4f1d390714db6d6420a35406b83b9b44999d4a' 'dfab9f504359640dcaa2b90ef3ff86c649aef8e0a2cce571acac5725637d692d' '217dac2e30183caac4d14fff7fba6a40ec5a39baef2cdb8f50672dc4693efe39' 'ce91459b0d8c9deb9a3e113878210ec9c2aa7e525735e438ffb80ab10d0fc928' 'f4a0682495d4afe46fb718a0b2b3af1de723ecd63d195f75f5a855d7adfed804' '03491e03d0dbc29146f7399b07236d0d912a74dacf58787dcf4af8bfb651e3cb' '19142a8855351499b1c8b2102af969c8ba2aa20f5fffecd86db225209cb786c6' '129257d78e11c128c2ce589b40feabae42a18cb2283d865716c2c060568911b0' 'a6a2799f489de84092cf6af082fee7c5b521e7c8a76f75c80af3fd2a483c6b66' '04a7176400907fd7db0d69116b99de49e582a6e176b3bfb36a03e50a4cb26a36')
 pkgver() {
     cd ffmpeg
     printf '%s.r%s.g%s' \
@@ -185,6 +187,14 @@ pkgver() {
 }
 
 prepare() {
+    # FFmpeg includes <AMF/core/...>, while the upstream AMF tree keeps the
+    # headers directly in amf/public/include.  Lay them out like Arch's
+    # amf-headers package does.  The vendored copy is required because
+    # FFmpeg master needs AMF 1.5.3, but amf-headers 1.5.3-1 in Arch still
+    # reports 1.5.2.
+    mkdir -p amf-include/AMF
+    cp -r "AMF-${_amf_ver}/amf/public/include/." amf-include/AMF/
+
     rm -f "ffmpeg/libavcodec"/libsvt_{hevc,vp9}.c
     patch -d ffmpeg -Np1 -i "${srcdir}/010-ffmpeg-add-svt-hevc.patch"
     patch -d ffmpeg -Np1 -i "${srcdir}/020-ffmpeg-add-svt-hevc-docs-g${_svt_hevc_ver:0:7}.patch"
@@ -236,7 +246,7 @@ build() {
     # The AV3A header (libavcodec/arcdav3a.h) lives inside the FFmpeg tree and
     # configure's probe compiles from outside it, so point the preprocessor at
     # the source root (same as the mpv package does).
-    export CPPFLAGS="-I${srcdir}/ffmpeg ${CPPFLAGS:-}"
+    export CPPFLAGS="-I${srcdir}/amf-include -I${srcdir}/ffmpeg ${CPPFLAGS:-}"
 
     cd ffmpeg
     printf '%s\n' '  -> Running ffmpeg configure script...'
@@ -380,10 +390,7 @@ build() {
         --enable-sndio \
         --enable-sdl2 \
         \
-        # AMF is autodetected: FFmpeg master needs AMF >= 1.5.3 headers, but
-        # Arch's amf-headers 1.5.3-1 still ships 1.5.2, so an explicit
-        # --enable-amf would abort the build.  Autodetection picks it up as
-        # soon as the package is fixed.
+        --enable-amf \
         --enable-cuda-llvm \
         --enable-cuvid \
         --enable-ffnvcodec \

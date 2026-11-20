@@ -61,6 +61,16 @@ xavs2 xevd xeve
 `astc-encoder` is new in the git recipe (it enables `--enable-libastcenc`);
 `--enable-libcurl` is kept because `curl` is in the official repositories.
 
+AMF is enabled explicitly, but the headers are vendored from the upstream
+AMF v1.5.3 tag instead of using `amf-headers`: FFmpeg master requires AMF
+1.5.3 (`AMF_VERSION_RELEASE >= 3`), while Arch's `amf-headers` 1.5.3-1 still
+ships headers that report 1.5.2, which makes `--enable-amf` abort configure
+with `amf requested but not found`. The tarball is laid out as
+`amf-include/AMF/...` in `prepare()` and put first in `CPPFLAGS`, so the
+build is independent of the installed headers. AMD users therefore get the
+`*_amf` encoders/decoders (the runtime is loaded with `dlopen` at run time,
+so no libamfrt dependency is needed).
+
 The removed `depends`, patches and `--enable-*` lines are recorded in a
 comment at the top of the PKGBUILD (`--enable-libastcenc` and its
 `astc-encoder` dependency included); restore them (and install the AUR
