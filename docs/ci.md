@@ -46,7 +46,8 @@ The default build is free: `--enable-nonfree` and `libfdk-aac` are not
 enabled anywhere, so everything the workflow publishes can be redistributed.
 For personal use, run the workflow manually with **nonfree** checked
 (`workflow_dispatch`). That run installs `libfdk-aac`, passes
-`FFMPEG_NONFREE=1` to both FFmpeg builds, uploads the packages as
+`FFMPEG_NONFREE=1` to both FFmpeg builds (this adds libfdk-aac and
+`cuda-nvcc`, which FFmpeg also treats as non-free), uploads the packages as
 `<pkg>-packages-nonfree`, and **skips the publish job** — those binaries never
 enter git. Download them from the run page and `pacman -U` them yourself.
 

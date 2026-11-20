@@ -260,7 +260,9 @@ build() {
     local -a _nonfree_opts=()
     if [[ ${FFMPEG_NONFREE:-0} == 1 ]]; then
         pkg-config --exists fdk-aac || error "FFMPEG_NONFREE=1 requires libfdk-aac"
-        _nonfree_opts=(--enable-nonfree --enable-libfdk-aac)
+        command -v nvcc >/dev/null || error "FFMPEG_NONFREE=1 enables cuda-nvcc, which needs the cuda package"
+        # FFmpeg classifies cuda-nvcc as a non-free hwaccel library.
+        _nonfree_opts=(--enable-nonfree --enable-libfdk-aac --enable-cuda-nvcc)
     fi
 
     # fix build of libavfilter/asrc_flite.c with gcc 14
@@ -387,7 +389,6 @@ build() {
         --enable-sdl2 \
         \
         --enable-amf \
-        --enable-cuda-nvcc \
         --enable-cuda-llvm \
         --enable-cuvid \
         --enable-ffnvcodec \

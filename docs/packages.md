@@ -68,6 +68,11 @@ sudo pacman -S libfdk-aac
 FFMPEG_NONFREE=1 makepkg -si
 ```
 
+FFmpeg also classifies `cuda-nvcc` (and `cuda_sdk`) as non-free, so the
+default build only enables `cuda-llvm` (clang-based CUDA compilation) plus the
+free `nvenc`/`nvdec`/`cuvid` hwaccels; `cuda-nvcc` is part of the non-free
+switch.
+
 The same switch works for `mpv-full-build-cavs-git` (its static FFmpeg). The
 result is then non-redistributable and must stay local; the CI artifacts of a
 `nonfree` workflow run are never published to the `repo` branch.

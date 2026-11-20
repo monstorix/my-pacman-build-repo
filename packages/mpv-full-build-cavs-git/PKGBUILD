@@ -556,9 +556,12 @@ prepare() {
 
     if [ -d /opt/cuda ]; then
       export NVCC_PREPEND_FLAGS='-ccbin /opt/cuda/bin/g++'
-      _ffmpeg_options+=('--enable-cuda-nvcc')
       _ffmpeg_options+=('--enable-cuda-llvm')
-      _ffmpeg_options+=('--enable-libnpp')
+      # cuda-nvcc is classified as non-free by FFmpeg, so only the opt-in
+      # non-free build may use it.
+      if [[ ${FFMPEG_NONFREE:-0} == 1 ]]; then
+        _ffmpeg_options+=('--enable-cuda-nvcc')
+      fi
       _ffmpeg_options+=('--extra-cflags=-I/opt/cuda/include')
       _ffmpeg_options+=('--extra-ldflags=-L/opt/cuda/lib64')
       _ffmpeg_options+=('--nvccflags=-O2')
