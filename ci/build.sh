@@ -60,7 +60,13 @@ build_local() {
   msg "Package: $name"
   (
     cd "$packages_dir/$name"
-    makepkg -f --noconfirm --cleanbuild --syncdeps --nocheck
+    # ffmpeg-full verifies the release tarball signature. The GitHub runners
+    # do not carry the FFmpeg release key and cannot always reach a keyserver;
+    # the tarball is pinned by sha256 in the PKGBUILD, so skip the PGP check
+    # there. Local builds still verify the signature.
+    local -a extra=()
+    [[ $name == ffmpeg-full-cavs ]] && extra+=(--skippgpcheck)
+    makepkg -f --noconfirm --cleanbuild --syncdeps --nocheck "${extra[@]}"
     if [[ $install == install ]]; then
       # Later packages need these installed: mpv and ffmpeg-full declare
       # "davs2" and "av3a-git" as depends/makedepends, but no pacman
