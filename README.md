@@ -7,7 +7,10 @@ Personal Arch Linux packaging for two things:
    DRA audio — the same decoder stack used by
    [nilaoda/mpv-iina-avs](https://github.com/nilaoda/mpv-iina-avs) on macOS,
    adapted to Linux/x86_64.
-2. **iCast DKMS**: an out-of-tree driver for the SMIT (国微) iCast USB
+2. **ffmpeg-full-cavs**: the AUR `ffmpeg-full` 9.0.2 feature set (shared
+   libraries, CUDA/NVENC, svt-av1/hevc/vp9, fdk-aac, …) with the same decoder
+   patch stack, as a drop-in replacement for the official `ffmpeg` package.
+3. **iCast DKMS**: an out-of-tree driver for the SMIT (国微) iCast USB
    DVB-T2/C adapter (`29df:0001`), built automatically for every installed
    kernel.
 
@@ -23,6 +26,7 @@ or inherited remotes; the working files are untouched.
 ```
 packages/
   mpv-full-build-cavs-git/   mpv + static FFmpeg 9.0.2 + 8 decoder patches
+  ffmpeg-full-cavs/          shared FFmpeg 9.0.2 (AUR ffmpeg-full) + same patches
   davs2-10bit-git/           AVS2 10-bit decoder (provides davs2)
   av3a-git/                  AVS3 audio reference decoder + binaural renderer
   icast-dkms/                SMIT iCast DVB-T2/C USB driver (DKMS)
@@ -48,6 +52,10 @@ SigLevel = Optional TrustAll
 ```bash
 sudo pacman -Syu
 sudo pacman -S mpv-full-build-cavs-git icast-dkms
+
+# Optional: replace the official ffmpeg with the patched full build.
+# It provides and conflicts with ffmpeg, so pacman asks to remove that first.
+sudo pacman -S ffmpeg-full-cavs
 ```
 
 The iCast driver loads by itself: a `modprobe.d` softdep loads
@@ -83,6 +91,7 @@ sudo pacman -S --needed base-devel git dkms linux-headers
 cd packages/av3a-git           && makepkg -si
 cd ../davs2-10bit-git          && makepkg -si
 cd ../mpv-full-build-cavs-git  && makepkg -si
+cd ../ffmpeg-full-cavs         && makepkg -si   # optional, replaces ffmpeg
 cd ../icast-dkms               && makepkg -si
 ```
 
@@ -103,9 +112,9 @@ Details, ordering and troubleshooting: [docs/local-build.md](docs/local-build.md
   four PKGBUILDs pass `namcap` with no errors.
 - `icast-dkms` builds, packages and compiles its modules against the running
   CachyOS kernel (clang-built kernels handled via `LLVM=1`).
-- The complete `makepkg` run for mpv was not possible on the author's machine
-  (no root, many build-only dependencies missing); the CI workflow performs
-  the full build.
+- The complete `makepkg` run for mpv and ffmpeg-full-cavs is not possible on
+  the author's machine (no root, many build-only dependencies missing); the CI
+  workflow performs the full builds, in parallel.
 
 ## Licensing
 
@@ -113,5 +122,9 @@ Details, ordering and troubleshooting: [docs/local-build.md](docs/local-build.md
 - davs2-10bit: GPL-2.0-only.
 - uavs3d: BSD-3-Clause.
 - av3a-git: the upstream snapshot carries **no license file**; the package is
-  tagged `LicenseRef-proprietary` and is intended for personal use only. Do not redistribute
-  the built binaries without clarifying the license.
+  tagged `LicenseRef-proprietary` and is intended for personal use only. Do not
+  redistribute the built binaries without clarifying the license.
+- ffmpeg-full-cavs: inherits the `ffmpeg-full` license tag
+  (`LicenseRef-nonfree-and-unredistributable`) because it links `libfdk-aac`
+  and enables other nonfree components (`--enable-nonfree`). Treat the built
+  binaries as personal-use only.

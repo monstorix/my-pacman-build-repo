@@ -11,29 +11,30 @@
 | `push` to `main` | Changes under `packages/`, `ci/` or `.github/workflows/` |
 | `workflow_dispatch` | Manual run from the Actions tab |
 
-Steps:
+The workflow is split into four jobs that run in separate containers and
+exchange packages through artifacts, so the two long FFmpeg builds never wait
+for each other:
 
-1. `pacman -Syu base-devel git sudo namcap`, create a `builder` user with
-   passwordless sudo, and `chown` the workspace (the container's checkout is
-   owned by root).
-2. `ci/build.sh` as `builder`:
-   - builds the AUR dependencies `chromaprint-fftw` and `uavs3d` from source
-     and installs them;
-   - builds and installs `av3a-git` and `davs2-10bit-git` (needed to link
-     FFmpeg);
-   - builds `mpv-full-build-cavs-git` (build only, not installed) and
-     smoke-tests the package: `--vd=help` must list `cavs`, `libdavs2` and
-     `libuavs3d` and `--ad=help` must list `libdra` and `libarcdav3a`,
-     otherwise the run fails;
-   - builds `icast-dkms`;
-   - copies every produced `*.pkg.tar.zst` (including the two AUR
-     dependencies) into `artifacts/`.
-3. `namcap` runs on the PKGBUILDs and packages (`|| true`, it is a report,
-   not a gate).
-4. The artifacts are uploaded with `actions/upload-artifact@v4`
-   (`arch-packages`, 14 days).
-5. `ci/push-repo.sh` publishes to the `repo` branch (skipped for pull
-   requests).
+| Job | Contents | Timeout |
+|---|---|---|
+| `deps` | builds `chromaprint-fftw` and `uavs3d` from the AUR, plus `av3a-git` and `davs2-10bit-git`; uploads `deps-packages` | 90 min |
+| `build` (matrix) | one job each for `mpv-full-build-cavs-git` and `ffmpeg-full-cavs`: installs `deps-packages`, builds its single package, smoke-tests it, uploads `<package>-packages` | 350 min |
+| `icast` | builds `icast-dkms` (does not depend on either FFmpeg) | 30 min |
+| `publish` | downloads every `*-packages` artifact and runs `ci/push-repo.sh` once | 30 min |
+
+Every job starts from `archlinux:latest`, installs `base-devel git sudo
+namcap`, creates a `builder` user with passwordless sudo and chowns the
+workspace (the checkout is owned by root). The two matrix jobs install the
+dependency packages with `pacman -U` before `makepkg --syncdeps` runs, so the
+local `davs2` / `av3a-git` names resolve. The ffmpeg job also removes the CUDA
+Nsight debuggers (several GB) before building.
+
+Smoke tests: the mpv package must list `cavs`, `libdavs2` and `libuavs3d` in
+`--vd=help` and `libdra`, `libarcdav3a` in `--ad=help`; `ffmpeg-full-cavs`
+must list the same five in `-decoders`. A missing decoder fails the job.
+
+`namcap` runs on the PKGBUILDs and packages (`|| true`: it is a report, not a
+gate). Artifacts are kept for 7 days.
 
 `timeout-minutes: 350` keeps a stuck build under GitHub's 6-hour job limit.
 The workflow needs `permissions: contents: write`; it uses the built-in
@@ -57,10 +58,9 @@ x86_64/
   *.pkg.tar.zst   (runtime packages only)
 ```
 
-Debug packages (`*-debug-*`) are built and uploaded as workflow artifacts but
-are **not** published to the `repo` branch: the mpv debug package is over
-100 MB, above GitHub's per-file limit. For the same reason `publish-repo.sh`
-skips any single package above ~95 MB with a warning.
+Debug packages (`*-debug-*`) are never copied into the artifacts: the mpv
+debug package alone is over 100 MB, above GitHub's per-file limit. The publish
+step additionally skips any single package above ~95 MB with a warning.
 
 `repo-add` normally creates `cavs.db` as a symlink to `cavs.db.tar.gz`.
 raw.githubusercontent.com serves symlinks as their target *text*, which would
@@ -111,7 +111,9 @@ implicitly through `GITHUB_REPOSITORY`.
 
 ## Costs and scheduling
 
-A full run takes roughly 1.5–3 hours (FFmpeg + mpv dominate). On a **public**
+A full run takes roughly 1.5–3 hours: the `deps` job is a few minutes, then
+mpv (~15 min) and ffmpeg-full (the longest step, because of LTO and the ~100
+codecs) run concurrently, and the DKMS package finishes in about a minute. On a **public**
 repository Actions minutes are free. On a **private** repository the free
 plan includes 2000 minutes/month, which is about 4–6 full runs — the weekly
 schedule fits, but manual runs should be used sparingly. Reducing the matrix

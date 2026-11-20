@@ -20,8 +20,14 @@ cd packages
 ( cd av3a-git           && makepkg -si )   # static AVS3 audio libs
 ( cd davs2-10bit-git    && makepkg -si )   # replaces davs2 / davs2-git
 ( cd mpv-full-build-cavs-git && makepkg -si )
+( cd ffmpeg-full-cavs    && makepkg -si )   # optional, replaces ffmpeg
 ( cd icast-dkms         && makepkg -si )
 ```
+
+`ffmpeg-full-cavs` is the AUR `ffmpeg-full` feature set with the same decoder
+patches. It pulls in ~110 build dependencies (including `cuda`) and
+`provides`/`conflicts` with `ffmpeg`, so `makepkg -si` asks before replacing
+the official package. Skip it if you only need mpv.
 
 `davs2-10bit-git` conflicts with `davs2`/`davs2-git`; `makepkg -si` asks
 before replacing them. `uavs3d` and `chromaprint-fftw` are not in the official
@@ -43,13 +49,24 @@ Useful `makepkg` flags:
 ```bash
 mpv --version                     # should mention FFmpeg n9.0.2
 mpv --vd=help | grep -E 'cavs|davs2|uavs3d'
-mpv --ad=help | grep -E 'cavs|dradec|arcdav3a'
-ffprobe -hide_banner -decoders | grep -E 'cavs|davs2|uavs3d|arcdav3a|dradec'
+mpv --ad=help | grep -E 'libdra|libarcdav3a'
+ffprobe -hide_banner -decoders | grep -E 'cavs|libdavs2|libuavs3d|libarcdav3a|libdra'
 ```
 
 Test files: any AVS/AVS+ (`.avs`), AVS2 10-bit, AVS3, and AV3A-in-TS sample.
 For a quick sanity check `mpv --no-config --vo=null --ao=null file.ts` should
 decode without "Could not open codec" errors.
+
+## Verifying the ffmpeg-full-cavs build
+
+```bash
+ffmpeg -hide_banner -decoders | grep -E 'cavs|libdavs2|libuavs3d|libarcdav3a|libdra'
+ffmpeg -hide_banner -version | head -n 3
+```
+
+The decoder names are `cavs` (AVS1/AVS+), `libdavs2`, `libuavs3d`,
+`libarcdav3a` (AV3A) and `libdra`; `libcavs` and `libdradec` are *not*
+registered names. `ffmpeg -h decoder=cavs` should print the codec help.
 
 ## DKMS package
 

@@ -16,6 +16,10 @@ in filename order by `prepare()`.
 | `0007-libdavs2-reset-reference-state-on-seek.patch` | Resets the davs2 reference state when seeking, avoiding corruption after a seek. |
 | `0008-libcavs-propagate-output-picture-field-metadata.patch` | Propagates output picture field/interlace metadata from libcavs. |
 
+The same eight patches are used by both `mpv-full-build-cavs-git` (against
+the static FFmpeg it vendors) and `ffmpeg-full-cavs` (against the AUR
+ffmpeg-full tarball, after the AUR patches).
+
 ## Verification performed
 
 - All eight patches apply to a pristine FFmpeg 9.0.2 tree in order, with no

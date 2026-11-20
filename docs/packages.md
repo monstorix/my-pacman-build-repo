@@ -3,10 +3,10 @@
 All packages are built from source with `makepkg`. The dependency graph is:
 
 ```
-uavs3d (AUR, 8+10-bit shared) ─┐
+uavs3d (AUR, 8+10-bit shared) ─┬─> mpv-full-build-cavs-git (static FFmpeg link)
 chromaprint-fftw (AUR) ────────┤
-av3a-git (local, static) ──────┼─> mpv-full-build-cavs-git
-davs2-10bit-git (local) ───────┘
+av3a-git (local, static) ──────┴─> ffmpeg-full-cavs (shared FFmpeg)
+davs2-10bit-git (local) ──> both
 icast-dkms ──> dkms, linux-headers
 ```
 
@@ -29,6 +29,37 @@ these changes:
   embeds (`libavcodec/arcdav3a.h`).
 
 Provided soname: `libmpv.so=2-64`.
+
+## ffmpeg-full-cavs
+
+A shared-library FFmpeg built from the AUR `ffmpeg-full` 9.0.2 recipe
+(`pkgrel=1` here). The AUR patches (010, 020, 030, 040, 050, 060, 070) are
+applied first, then the same eight decoder patches as the mpv package. On top
+of the `--enable-libdavs2` / `--enable-libuavs3d` that ffmpeg-full already
+enables, it adds `--enable-libarcdav3a`; `av3a-git` is a `makedepends`.
+
+It `provides` and `conflicts` with `ffmpeg` (plus the `libav*.so` names), so
+installing it replaces the official package. mpv is unaffected: it statically
+links its own FFmpeg.
+
+Sixteen ffmpeg-full features are disabled because their libraries exist only
+in the AUR and would drag ~16 extra source recipes into unattended CI:
+
+```
+decklink-sdk flite1 lcevcdec libklvanc mpeghdec openapv opencv4 quirc
+rockchip-mpp svt-jpeg-xs vo-amrwbenc vvenc xavs xavs2 xevd xeve
+```
+
+The removed `depends`, patches and `--enable-*` lines are recorded in a
+comment at the top of the PKGBUILD; restore them (and install the AUR
+packages) for a truly complete build. Everything available in the official
+repositories stays enabled: libfdk-aac/nonfree, CUDA/NVENC/NVDEC, svt-av1,
+svt-hevc, svt-vp9, vulkan, vaapi, vdpau, whisper, lensfun, x264/x265, dav1d,
+rav1e and the rest of the ffmpeg-full feature list.
+
+License: `LicenseRef-nonfree-and-unredistributable`, inherited from
+ffmpeg-full because of `--enable-nonfree` and libfdk-aac; treat the binaries
+as personal use only.
 
 ## davs2-10bit-git
 
