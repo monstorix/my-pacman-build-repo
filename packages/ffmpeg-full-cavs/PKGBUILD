@@ -245,6 +245,11 @@ build() {
         -DWHISPER_BUILD_TESTS:BOOL='OFF'
     cmake --build build/whisper.cpp --target install
     
+    # The AV3A header (libavcodec/arcdav3a.h) lives inside the FFmpeg tree and
+    # configure's probe compiles from outside it, so point the preprocessor at
+    # the source root (same as the mpv package does).
+    export CPPFLAGS="-I${srcdir}/ffmpeg-${pkgver} ${CPPFLAGS:-}"
+
     cd "ffmpeg-${pkgver}"
     printf '%s\n' '  -> Running ffmpeg configure script...'
     
