@@ -380,7 +380,10 @@ build() {
         --enable-sndio \
         --enable-sdl2 \
         \
-        --enable-amf \
+        # AMF is autodetected: FFmpeg master needs AMF >= 1.5.3 headers, but
+        # Arch's amf-headers 1.5.3-1 still ships 1.5.2, so an explicit
+        # --enable-amf would abort the build.  Autodetection picks it up as
+        # soon as the package is fixed.
         --enable-cuda-llvm \
         --enable-cuvid \
         --enable-ffnvcodec \
