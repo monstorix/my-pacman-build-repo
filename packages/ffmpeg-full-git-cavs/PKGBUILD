@@ -128,7 +128,6 @@ makedepends=(
     'git'
     'glslang'
     'gmp'
-    'libgl'
     'lv2'
     'nasm'
     'opencl-headers'
@@ -392,7 +391,6 @@ build() {
         --enable-nvenc \
         --disable-ohcodec \
         --enable-opencl \
-        --enable-opengl \
         --enable-v4l2-m2m \
         --enable-vdpau \
         --enable-vaapi \

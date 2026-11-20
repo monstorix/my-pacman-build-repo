@@ -13,7 +13,6 @@ pkgbase = ffmpeg-full-git-cavs
 	makedepends = git
 	makedepends = glslang
 	makedepends = gmp
-	makedepends = libgl
 	makedepends = lv2
 	makedepends = nasm
 	makedepends = opencl-headers
