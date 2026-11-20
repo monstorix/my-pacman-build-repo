@@ -21,7 +21,56 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Fast job: libraries that both FFmpeg builds need. Their packages are
+  # handed to the two build jobs through an artifact, so the long builds never
+  # wait for each other.
+  deps:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+      options: --privileged
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare build environment
+        run: |
+          pacman -Syu --noconfirm --needed base-devel git sudo namcap
+          useradd -m builder
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+          sudo -u builder git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Build dependencies
+        run: sudo -u builder -H env MAKEFLAGS="-j$(nproc)" bash ci/build.sh deps
+
+      - name: Namcap check
+        if: always()
+        run: |
+          shopt -s nullglob
+          pkgs=(artifacts/*.pkg.tar.zst)
+          if ((${#pkgs[@]})); then namcap "${pkgs[@]}" || true; fi
+
+      - name: Upload dependency packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: deps-packages
+          path: artifacts/*.pkg.tar.zst
+          if-no-files-found: error
+          retention-days: 7
+
+  # The two long FFmpeg builds run in parallel. Each one installs the
+  # dependency packages from the artifact above and builds a single package.
   build:
+    needs: deps
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - mpv-full-build-cavs-git
+          - ffmpeg-full-cavs
     runs-on: ubuntu-latest
     container:
       image: archlinux:latest
@@ -40,30 +89,103 @@ jobs:
           chown -R builder:builder "$GITHUB_WORKSPACE"
           sudo -u builder git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      - name: Build packages
-        run: sudo -u builder -H env MAKEFLAGS="-j$(nproc)" bash ci/build.sh
+      - name: Fetch dependency packages
+        uses: actions/download-artifact@v4
+        with:
+          name: deps-packages
+          path: deps-pkgs
+
+      - name: Install dependency packages
+        run: pacman -U --noconfirm --needed deps-pkgs/*.pkg.tar.zst
+
+      # CUDA is a build dependency of ffmpeg-full; its bundled Nsight
+      # debuggers take gigabytes that the runner does not need.
+      - name: Trim the CUDA toolkit
+        if: matrix.package == 'ffmpeg-full-cavs'
+        run: |
+          pacman -S --noconfirm --needed cuda
+          rm -rf /opt/cuda/nsight* /opt/cuda/samples /opt/cuda/extras
+          pacman -Scc --noconfirm
+
+      - name: Build ${{ matrix.package }}
+        run: sudo -u builder -H env MAKEFLAGS="-j$(nproc)" bash ci/build.sh package ${{ matrix.package }}
 
       - name: Namcap check
         if: always()
         run: |
           shopt -s nullglob
           pkgs=(artifacts/*.pkg.tar.zst)
-          if ((${#pkgs[@]})); then
-            namcap "${pkgs[@]}" || true
-            for p in packages/*/PKGBUILD; do namcap "$p" || true; done
-          fi
+          if ((${#pkgs[@]})); then namcap "${pkgs[@]}" || true; fi
+          for p in packages/*/PKGBUILD; do namcap "$p" || true; done
 
-      - name: Upload artifacts
+      - name: Upload ${{ matrix.package }}
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: arch-packages
+          name: ${{ matrix.package }}-packages
           path: artifacts/*.pkg.tar.zst
           if-no-files-found: ignore
-          retention-days: 14
+          retention-days: 7
+
+  # The DKMS package does not depend on either FFmpeg and takes a minute.
+  icast:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+      options: --privileged
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare build environment
+        run: |
+          pacman -Syu --noconfirm --needed base-devel git sudo namcap
+          useradd -m builder
+          echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+          sudo -u builder git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Build icast-dkms
+        run: sudo -u builder -H bash ci/build.sh package icast-dkms
+
+      - name: Upload icast-dkms
+        uses: actions/upload-artifact@v4
+        with:
+          name: icast-dkms-packages
+          path: artifacts/*.pkg.tar.zst
+          if-no-files-found: error
+          retention-days: 7
+
+  # Single writer for the repository branch: all packages are published in one
+  # commit, so parallel build jobs never race on the same remote ref.
+  publish:
+    needs: [build, icast]
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+      options: --privileged
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install helpers
+        run: pacman -Syu --noconfirm --needed git python
+
+      - name: Collect packages
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "*-packages"
+          path: artifacts
+          merge-multiple: true
 
       - name: Publish pacman repository branch
-        if: github.event_name != 'pull_request'
         env:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bash ci/push-repo.sh
+        run: |
+          ls -lh artifacts
+          bash ci/push-repo.sh
