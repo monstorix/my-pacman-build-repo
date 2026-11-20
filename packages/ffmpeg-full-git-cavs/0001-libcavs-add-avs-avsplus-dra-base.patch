@@ -2,7 +2,7 @@ diff --git a/libavcodec/Makefile b/libavcodec/Makefile
 index 95ba308..837366e 100644
 --- a/libavcodec/Makefile
 +++ b/libavcodec/Makefile
-@@ -303,7 +303,6 @@ OBJS-$(CONFIG_BMV_VIDEO_DECODER)       += bmvvideo.o
+@@ -303,8 +303,7 @@ OBJS-$(CONFIG_BMV_VIDEO_DECODER)       += bmvvideo.o
  OBJS-$(CONFIG_BONK_DECODER)            += bonk.o
  OBJS-$(CONFIG_BRENDER_PIX_DECODER)     += brenderpix.o
  OBJS-$(CONFIG_C93_DECODER)             += c93.o
@@ -12,13 +12,13 @@ index 95ba308..837366e 100644
  OBJS-$(CONFIG_CBD2_DPCM_DECODER)       += dpcm.o
  OBJS-$(CONFIG_CCAPTION_DECODER)        += ccaption_dec.o ass.o
  OBJS-$(CONFIG_CDGRAPHICS_DECODER)      += cdgraphics.o
-@@ -1186,6 +1185,7 @@ OBJS-$(CONFIG_LIBJXL_ENCODER)             += libjxlenc.o libjxl.o
+@@ -1208,6 +1208,7 @@ OBJS-$(CONFIG_LIBJXL_ENCODER)             += libjxlenc.o libjxl.o
  OBJS-$(CONFIG_LIBKVAZAAR_ENCODER)         += libkvazaar.o
  OBJS-$(CONFIG_LIBLC3_ENCODER)             += liblc3enc.o
  OBJS-$(CONFIG_LIBLC3_DECODER)             += liblc3dec.o
 +OBJS-$(CONFIG_LIBDRA_DECODER)             += libdradec.o dradec.o
  OBJS-$(CONFIG_LIBMP3LAME_ENCODER)         += libmp3lame.o
- OBJS-$(CONFIG_LIBMPEGHDEC_DECODER)        += libmpeghdec.o
+ OBJS-$(CONFIG_LIBMPEGHDEC_DECODER)        += libmpeghdec.o mpegaudiotabs.o
  OBJS-$(CONFIG_LIBOAPV_ENCODER)            += liboapvenc.o
 diff --git a/libavcodec/allcodecs.c b/libavcodec/allcodecs.c
 index 47eded2..0ab53e6 100644
