@@ -237,7 +237,8 @@ if [ -z ${MPV_NO_CHECK_OPT_DEPEND+yes} ]; then
   fi
 
   if [ -d /opt/cuda ]; then
-    makedepends+=('cuda')
+    # cuda is a runtime dependency (it also pulls the headers and nvcc in
+    # for the build), so it must not be listed in makedepends as well.
     depends+=('cuda')
   fi
 fi

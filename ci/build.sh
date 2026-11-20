@@ -118,9 +118,13 @@ verify_ffmpeg() {
   out="$dir/decoders.txt"
   LC_ALL=C LD_LIBRARY_PATH="$dir/usr/lib:${LD_LIBRARY_PATH:-}" \
     "$dir/usr/bin/ffmpeg" -hide_banner -decoders >"$out" 2>&1 || true
-  head -n 3 "$out" >&2 || true
   for dec in cavs libdavs2 libuavs3d libarcdav3a libdra; do
-    grep -qw -- "$dec" "$out" || { echo "!! decoder $dec is missing" >&2; missing=1; }
+    if grep -qw -- "$dec" "$out"; then
+      grep -w -- "$dec" "$out" | head -n 1 | sed 's/^/  /' >&2
+    else
+      echo "!! decoder $dec is missing" >&2
+      missing=1
+    fi
   done
   if [[ $missing -ne 0 ]]; then
     echo "--- decoder lines matching AVS/DRA ---" >&2
